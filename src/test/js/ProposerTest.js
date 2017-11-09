@@ -1,4 +1,4 @@
-import Node, {allRoles} from "../../main/js/paxos/Node";
+import Node, {allRoles, State} from "../../main/js/paxos/Node";
 import Cluster from "../../main/js/paxos/Cluster";
 import {Promise, ProposalId} from "../../main/js/paxos/Messages";
 import Proposer from "../../main/js/paxos/Proposer";
@@ -9,6 +9,7 @@ const assert = require('assert');
 const _buildAcceptorMockedNode = (nodeID) => {
 	const node = new Node(nodeID, allRoles);
 	node._acceptor = new AcceptorMock();
+	node._state = State.UP;
 	return node;
 };
 

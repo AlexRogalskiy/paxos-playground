@@ -41,27 +41,41 @@ class Node {
 	// ---- PROPOSER ----
 
 	prepareValue(value) {
+		if (this._isDown()) return;
+
 		this._proposer.prepareValue(value)
 	}
 
 	handlePromise(promise) {
+		if (this._isDown()) return;
+
 		this._proposer.handlePromise(promise);
 	}
 
 	// ---- ACCEPTOR ----
 
 	handlePrepare(prepare) {
+		if (this._isDown()) return;
+
 		this._acceptor.handlePrepare(prepare);
 	}
 
 	handleAccept(accept) {
+		if (this._isDown()) return;
+
 		this._acceptor.handleAccept(accept);
 	}
 
 	// ---- LEARNER ----
 
 	handleAccepted(accepted) {
+		if (this._isDown()) return;
+
 		this._learner.handleAccepted(accepted);
+	}
+
+	_isDown() {
+		return this._state === State.DOWN;
 	}
 
 	get roles() {
@@ -81,7 +95,7 @@ export const Role = {
 
 export const allRoles = [Role.PROPOSER, Role.ACCEPTOR, Role.LEARNER];
 
-const State = {
+export const State = {
 	UP: Symbol("proposer"),
 	DOWN: Symbol("down"),
 };

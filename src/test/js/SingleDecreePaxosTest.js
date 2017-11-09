@@ -26,13 +26,39 @@ describe('Single decree paxos', () => {
 			this.node2.start();
 		});
 
-		it('Should agree on value', function () {
+		it('Should agree on a given value', function () {
 			const proposer = this.cluster.proposers[0];
 			const value = "some value";
 			proposer.prepareValue(value);
 
 			this.cluster.learners.forEach((node) => {
 				assert.equal(value, node._learner._finalValue)
+			})
+		});
+
+		it('Should agree on a given value even with only 2 nodes up', function () {
+			this.node2.stop();
+
+			const proposer = this.cluster.proposers[0];
+			const value = "some value";
+			proposer.prepareValue(value);
+
+			assert.equal(value, this.cluster.learners[0]._learner._finalValue)
+			assert.equal(value, this.cluster.learners[1]._learner._finalValue)
+			assert.equal(undefined, this.cluster.learners[2]._learner._finalValue)
+
+		});
+
+		it('Should not be able to agree on value with only 1 node up', function () {
+			this.node1.stop();
+			this.node2.stop();
+
+			const proposer = this.cluster.proposers[0];
+			const value = "some value";
+			proposer.prepareValue(value);
+
+			this.cluster.learners.forEach((node) => {
+				assert.equal(undefined, node._learner._finalValue)
 			})
 		})
 	});

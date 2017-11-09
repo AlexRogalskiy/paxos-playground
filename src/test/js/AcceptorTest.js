@@ -1,4 +1,4 @@
-import Node, {Role} from "../../main/js/paxos/Node";
+import Node, {Role, State} from "../../main/js/paxos/Node";
 import ProposerMock from "./mocks/ProposerMock";
 import Cluster from "../../main/js/paxos/Cluster";
 import LearnerMock from "./mocks/LearnerMock";
@@ -12,6 +12,7 @@ const _buildMockedNode = (nodeID) => {
 	const node = new Node(nodeID, allRoles);
 	node._proposer = new ProposerMock();
 	node._learner = new LearnerMock();
+	node._state = State.UP;
 	return node;
 };
 
