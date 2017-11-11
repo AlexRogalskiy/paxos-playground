@@ -6,24 +6,23 @@ class Node {
 	_id;
 	_roles;
 	_state;
+	_log;
 
 	_cluster;
-	_proposer;
-	_acceptor;
-	_learner;
+	_paxosInstance;
 
 	constructor(id, roles) {
 		this._id = id;
 		this._roles = roles;
 		this._state = State.DOWN;
+		this._log = [];
 	}
 
 	setup(cluster) {
 		this._cluster = cluster;
 
-		this._proposer = new Proposer(this.id, cluster);
-		this._acceptor = new Acceptor(cluster);
-		this._learner = new Learner(cluster);
+		//Initial paxos instance creation
+		this._paxosInstance = new PaxosInstance(0, this.id, cluster);
 	}
 
 	start() {
@@ -43,35 +42,48 @@ class Node {
 	prepareValue(value) {
 		if (this._isDown()) return;
 
-		this._proposer.prepareValue(value)
+		this._paxosInstance.proposer.prepareValue(value)
 	}
 
 	handlePromise(promise) {
 		if (this._isDown()) return;
+		if (!this._isFromCurrentPaxosInstance(promise)) return;
 
-		this._proposer.handlePromise(promise);
+		this._paxosInstance.proposer.handlePromise(promise);
 	}
 
 	// ---- ACCEPTOR ----
 
 	handlePrepare(prepare) {
 		if (this._isDown()) return;
+		if (!this._isFromCurrentPaxosInstance(prepare)) return;
 
-		this._acceptor.handlePrepare(prepare);
+		this._paxosInstance.acceptor.handlePrepare(prepare);
 	}
 
 	handleAccept(accept) {
 		if (this._isDown()) return;
+		if (!this._isFromCurrentPaxosInstance(accept)) return;
 
-		this._acceptor.handleAccept(accept);
+		this._paxosInstance.acceptor.handleAccept(accept);
 	}
 
 	// ---- LEARNER ----
 
 	handleAccepted(accepted) {
 		if (this._isDown()) return;
+		if (!this._isFromCurrentPaxosInstance(accepted)) return;
 
-		this._learner.handleAccepted(accepted);
+		const resolution = this._paxosInstance.learner.handleAccepted(accepted);
+
+		if (resolution !== undefined && this._isFromCurrentPaxosInstance(resolution)) {
+			//store final value
+			this._log.push(resolution.value);
+
+			//advance paxos instance
+			const newInstanceNumber = this._paxosInstance.paxosInstanceNumber + 1;
+			this._paxosInstance = new PaxosInstance(newInstanceNumber, this.id, this._cluster)
+		}
 	}
 
 	_isDown() {
@@ -84,6 +96,44 @@ class Node {
 
 	get id() {
 		return this._id;
+	}
+
+	_isFromCurrentPaxosInstance(msg) {
+		return msg.paxosInstanceNumber === this._paxosInstance.paxosInstanceNumber;
+	}
+
+	get log() {
+		return this._log;
+	}
+}
+
+class PaxosInstance {
+	_proposer;
+	_acceptor;
+	_learner;
+
+	constructor(paxosInstanceNumber, id, cluster) {
+		this._paxosInstanceNumber = paxosInstanceNumber;
+		this._proposer = new Proposer(this._paxosInstanceNumber, cluster, id);
+		this._acceptor = new Acceptor(this._paxosInstanceNumber, cluster);
+		this._learner = new Learner(this._paxosInstanceNumber, cluster);
+	}
+
+
+	get proposer() {
+		return this._proposer;
+	}
+
+	get acceptor() {
+		return this._acceptor;
+	}
+
+	get learner() {
+		return this._learner;
+	}
+
+	get paxosInstanceNumber() {
+		return this._paxosInstanceNumber;
 	}
 }
 

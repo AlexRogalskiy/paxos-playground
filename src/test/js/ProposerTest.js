@@ -1,4 +1,4 @@
-import Node, {allRoles, State} from "../../main/js/paxos/Node";
+import Node, {allRoles} from "../../main/js/paxos/Node";
 import Cluster from "../../main/js/paxos/Cluster";
 import {Promise, ProposalId} from "../../main/js/paxos/Messages";
 import Proposer from "../../main/js/paxos/Proposer";
@@ -6,15 +6,14 @@ import AcceptorMock from "./mocks/AcceptorMock";
 
 const assert = require('assert');
 
-const _buildAcceptorMockedNode = (nodeID) => {
-	const node = new Node(nodeID, allRoles);
-	node._acceptor = new AcceptorMock();
-	node._state = State.UP;
-	return node;
+const _mockSetupAndStart = (node, cluster) => {
+	node.setup(cluster);
+	node._paxosInstance._acceptor = new AcceptorMock();
+	node.start();
 };
 
 const _fetchReceivedPrepare = (cluster, nodeIdx) => {
-	const mockAcceptor = cluster.acceptors[nodeIdx]._acceptor;
+	const mockAcceptor = cluster.acceptors[nodeIdx]._paxosInstance.acceptor;
 	return mockAcceptor.receivedPrepares[0];
 };
 
@@ -22,13 +21,21 @@ describe('Proposer', function () {
 
 	describe('A Proposer in a 3 node cluster', function () {
 		beforeEach(function () {
-			this.cluster = new Cluster([
-				_buildAcceptorMockedNode(0),
-				_buildAcceptorMockedNode(1),
-				_buildAcceptorMockedNode(2)
-			]);
+			this.node0 = new Node(0, allRoles);
+			this.node1 = new Node(1, allRoles);
+			this.node2 = new Node(2, allRoles);
 
-			this.proposer = new Proposer(1, this.cluster);
+			const allNodes = [
+				this.node0,
+				this.node1,
+				this.node2
+			];
+
+			this.cluster = new Cluster(allNodes);
+
+			allNodes.forEach((node) => _mockSetupAndStart(node, this.cluster));
+
+			this.proposer = new Proposer(0, this.cluster, 0);
 		});
 
 		describe('prepareValue()', function () {
@@ -38,7 +45,7 @@ describe('Proposer', function () {
 
 			it(`each acceptor should have received 1 message`, function () {
 				this.cluster.acceptors.forEach(node => {
-					const mockAcceptor = node._acceptor;
+					const mockAcceptor = node._paxosInstance.acceptor;
 					assert.equal(1, mockAcceptor.receivedPrepares.length);
 				});
 			});
@@ -47,7 +54,7 @@ describe('Proposer', function () {
 				const aReceivedPrepare = _fetchReceivedPrepare(this.cluster, 0);
 
 				this.cluster.acceptors.forEach(node => {
-					const mockAcceptor = node._acceptor;
+					const mockAcceptor = node._paxosInstance.acceptor;
 					const receivedPrepare = mockAcceptor.receivedPrepares[0];
 					assert.equal(aReceivedPrepare.proposalId, receivedPrepare.proposalId);
 					assert.equal(aReceivedPrepare.sourceNodeId, receivedPrepare.sourceNodeId);
@@ -59,8 +66,8 @@ describe('Proposer', function () {
 
 		describe('handlePromise()', () => {
 			beforeEach(function () {
-				this.previousProposalId1 = new ProposalId(1);
-				this.previousProposalId2 = new ProposalId(1);
+				this.previousProposalId1 = new ProposalId(0);
+				this.previousProposalId2 = new ProposalId(0);
 
 				//need to call prepareValue first to populate currentProposal
 				this.proposerValue = "some value";
@@ -69,7 +76,7 @@ describe('Proposer', function () {
 
 			it(`promise should be registered on proposer`, function () {
 				const prepare0 = _fetchReceivedPrepare(this.cluster, 0);
-				const promise0 = new Promise(prepare0, undefined, undefined);
+				const promise0 = new Promise(0, prepare0, undefined, undefined);
 
 				this.proposer.handlePromise(promise0);
 
@@ -79,7 +86,7 @@ describe('Proposer', function () {
 			it(`after receiving 3 promises it should broadcast accept`, function () {
 				for (let i = 0; i < 3; i++) {
 					const prepare = _fetchReceivedPrepare(this.cluster, i);
-					const promise = new Promise(prepare, undefined, undefined);
+					const promise = new Promise(0, prepare, undefined, undefined);
 					this.proposer.handlePromise(promise);
 				}
 
@@ -88,7 +95,7 @@ describe('Proposer', function () {
 
 				//check the the accept was broadcasted
 				this.cluster.acceptors.forEach(node => {
-					const mockAcceptor = node._acceptor;
+					const mockAcceptor = node._paxosInstance.acceptor;
 					assert.equal(1, mockAcceptor.receivedAccepts.length);
 				});
 			});
@@ -96,7 +103,7 @@ describe('Proposer', function () {
 			it(`if everybody answered null it should use proposer value`, function () {
 				for (let i = 0; i < 3; i++) {
 					const prepare = _fetchReceivedPrepare(this.cluster, i);
-					const promise = new Promise(prepare, undefined, undefined);
+					const promise = new Promise(0, prepare, undefined, undefined);
 					this.proposer.handlePromise(promise);
 				}
 
@@ -105,7 +112,7 @@ describe('Proposer', function () {
 
 				//check the the accept was broadcasted
 				this.cluster.acceptors.forEach(node => {
-					const mockAcceptor = node._acceptor;
+					const mockAcceptor = node._paxosInstance.acceptor;
 					assert.equal(1, mockAcceptor.receivedAccepts.length);
 					assert.equal(this.proposerValue, mockAcceptor.receivedAccepts[0].value);
 				});
@@ -115,7 +122,7 @@ describe('Proposer', function () {
 				const lastAcceptedValue = "another value";
 				for (let i = 0; i < 3; i++) {
 					const prepare = _fetchReceivedPrepare(this.cluster, i);
-					const promise = new Promise(prepare, this.previousProposalId1, lastAcceptedValue);
+					const promise = new Promise(0, prepare, this.previousProposalId1, lastAcceptedValue);
 					this.proposer.handlePromise(promise);
 				}
 
@@ -124,7 +131,7 @@ describe('Proposer', function () {
 
 				//check the the accept was broadcasted
 				this.cluster.acceptors.forEach(node => {
-					const mockAcceptor = node._acceptor;
+					const mockAcceptor = node._paxosInstance.acceptor;
 					assert.equal(1, mockAcceptor.receivedAccepts.length);
 					assert.equal(lastAcceptedValue, mockAcceptor.receivedAccepts[0].value);
 				});
@@ -134,12 +141,12 @@ describe('Proposer', function () {
 				//node 0 has seen some previous value
 				const lastAcceptedValue = "another value";
 				const prepare = _fetchReceivedPrepare(this.cluster, 0);
-				const promise = new Promise(prepare, this.previousProposalId1, lastAcceptedValue);
+				const promise = new Promise(0, prepare, this.previousProposalId1, lastAcceptedValue);
 				this.proposer.handlePromise(promise);
 
 				for (let i = 1; i < 3; i++) {
 					const prepare = _fetchReceivedPrepare(this.cluster, i);
-					const promise = new Promise(prepare, undefined, undefined);
+					const promise = new Promise(0, prepare, undefined, undefined);
 					this.proposer.handlePromise(promise);
 				}
 
@@ -148,7 +155,7 @@ describe('Proposer', function () {
 
 				//check the the accept was broadcasted
 				this.cluster.acceptors.forEach(node => {
-					const mockAcceptor = node._acceptor;
+					const mockAcceptor = node._paxosInstance.acceptor;
 					assert.equal(1, mockAcceptor.receivedAccepts.length);
 					assert.equal(lastAcceptedValue, mockAcceptor.receivedAccepts[0].value);
 				});
@@ -160,13 +167,13 @@ describe('Proposer', function () {
 				//node 1
 				const lastAcceptedValue1 = "another value";
 				const prepare1 = _fetchReceivedPrepare(this.cluster, 1);
-				const promise1 = new Promise(prepare1, this.previousProposalId1, lastAcceptedValue1);
+				const promise1 = new Promise(0, prepare1, this.previousProposalId1, lastAcceptedValue1);
 				this.proposer.handlePromise(promise1);
 
 				//node 2
 				const lastAcceptedValue2 = "yet another value";
 				const prepare2 = _fetchReceivedPrepare(this.cluster, 2);
-				const promise2 = new Promise(prepare2, this.previousProposalId2, lastAcceptedValue2);
+				const promise2 = new Promise(0, prepare2, this.previousProposalId2, lastAcceptedValue2);
 				this.proposer.handlePromise(promise2);
 
 				//check that the proposal is prepared
@@ -174,7 +181,7 @@ describe('Proposer', function () {
 
 				//check the the accept was broadcasted
 				this.cluster.acceptors.forEach(node => {
-					const mockAcceptor = node._acceptor;
+					const mockAcceptor = node._paxosInstance.acceptor;
 					assert.equal(1, mockAcceptor.receivedAccepts.length);
 					assert.equal(lastAcceptedValue2, mockAcceptor.receivedAccepts[0].value);
 				});

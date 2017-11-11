@@ -3,19 +3,21 @@
  * selected, and tracks which peers have accepted the final value.
  */
 
+import {Resolution} from "./Messages";
+
 class Learner {
 	_proposalMap;
 	_cluster;
 	_lastAcceptedProposalsMap; // nodeId -> lastAcceptedProposalId
 
-	_finalValue;
-	_finalProposalId;
+	_finalResolution;
+	_paxosInstanceNumber;
 
-	constructor(cluster) {
+	constructor(paxosInstanceNumber, cluster) {
+		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._cluster = cluster;
 		this._proposalMap = new Map();
 		this._lastAcceptedProposalsMap = new Map();
-		this._finalValue = undefined;
 	}
 
 	/**
@@ -27,9 +29,10 @@ class Learner {
 	 * @param accepted: the accepted message
 	 */
 	handleAccepted(accepted) {
-		if (this._finalValue !== undefined) {
+		if (this._finalResolution !== undefined) {
 			// Ignore, we already achieved resolution
-			return
+			console.log(`We already achieved resolution with final value ${this._finalResolution}.`);
+			return this._finalResolution;
 		}
 
 		if (this._isOldMsg(accepted)) {
@@ -41,9 +44,9 @@ class Learner {
 		proposal.registerAccepted(accepted);
 		if (proposal.isAccepted()) {
 			console.log(`Proposal ${proposal} has been accepted`);
-			this._finalValue = accepted.value;
-			this._finalProposalId = accepted.proposalId;
-			//TODO should we send resolution?
+			//TODO this is weird because we're returning instead of sending messages
+			this._finalResolution = new Resolution(accepted);
+			return this._finalResolution;
 		}
 	}
 
@@ -91,7 +94,6 @@ class Proposal {
 	constructor(_quorum) {
 		this._acceptedSet = new Set();
 		this._quorum = _quorum;
-		this.proposalValue = undefined;
 	}
 
 	registerAccepted(accepted) {

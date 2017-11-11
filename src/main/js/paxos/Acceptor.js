@@ -14,8 +14,10 @@ class Acceptor {
 	_promisedProposalId;
 	_acceptedProposalId;
 	_acceptedValue;
+	_paxosInstanceNumber;
 
-	constructor(cluster) {
+	constructor(paxosInstanceNumber, cluster) {
+		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._cluster = cluster;
 	}
 
@@ -26,7 +28,7 @@ class Acceptor {
 		let promise;
 		if (this._honorsPromise(proposalId) && !this._isAccepted(proposalId)) {
 			// accept prepare
-			promise = new Promise(prepare, this._acceptedValue, this._acceptedProposalId);
+			promise = new Promise(this._paxosInstanceNumber, prepare, this._acceptedValue, this._acceptedProposalId);
 			this._promisedProposalId = proposalId;
 			proposer.handlePromise(promise)
 		} else {

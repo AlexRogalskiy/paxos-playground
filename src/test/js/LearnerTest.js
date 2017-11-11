@@ -28,13 +28,13 @@ describe('Learner', function () {
 			this.node2.setup(this.cluster);
 			this.node2.start();
 
-			this.learner = new Learner(this.cluster);
+			this.learner = new Learner(0, this.cluster);
 		});
 
 		describe('handleAccepted()', function () {
 			it(`it should register new accepted message`, function () {
 				const proposalId = new ProposalId(0);
-				const accept = new Accept(1, 1, proposalId, "some value");
+				const accept = new Accept(0, 1, 1, proposalId, "some value");
 				const accepted = new Accepted(accept);
 				this.learner.handleAccepted(accepted);
 
@@ -45,44 +45,47 @@ describe('Learner', function () {
 				const value = "some value";
 				const proposalId = new ProposalId(0);
 
-				const accept0 = new Accept(0, 0, proposalId, value);
+				const accept0 = new Accept(0, 0, 0, proposalId, value);
 				const accepted0 = new Accepted(accept0);
 				this.learner.handleAccepted(accepted0);
 
-				const accept1 = new Accept(0, 1, proposalId, value);
+				const accept1 = new Accept(0, 0, 1, proposalId, value);
 				const accepted1 = new Accepted(accept1);
-				this.learner.handleAccepted(accepted1);
+				const resolution = this.learner.handleAccepted(accepted1);
 
-				assert.equal(value, this.learner._finalValue);
+				assert.equal(value, resolution.value);
 			});
 
-			it(`it should ignore messages once resolution was achieved`, function () {
+			it(`it should ignore message and return resolution once resolution was achieved`, function () {
 				const value = "some value";
 				const proposalId = new ProposalId(0);
 
-				const accept0 = new Accept(0, 0, proposalId, value);
+				const accept0 = new Accept(0, 0, 0, proposalId, value);
 				const accepted0 = new Accepted(accept0);
 				this.learner.handleAccepted(accepted0);
 
-				const accept1 = new Accept(0, 1, proposalId, value);
+				const accept1 = new Accept(0, 0, 1, proposalId, value);
 				const accepted1 = new Accepted(accept1);
-				this.learner.handleAccepted(accepted1);
+				const resolution1 = this.learner.handleAccepted(accepted1);
 
-				const accept2 = new Accept(0, 2, proposalId, value);
+				const accept2 = new Accept(0, 0, 2, proposalId, value);
 				const accepted2 = new Accepted(accept2);
-				this.learner.handleAccepted(accepted2);
+				const resolution2 = this.learner.handleAccepted(accepted2);
 
+				//ignore message
 				assert.equal(2, this.learner._fetchProposal(proposalId)._acceptedSet.size);
+				//return resolution
+				assert.equal(resolution1, resolution2);
 			});
 
 			it(`it should throw exception if we receive same proposalId for different values`, function () {
 				const proposalId = new ProposalId(0);
 
-				const accept0 = new Accept(0, 0, proposalId, "some value");
+				const accept0 = new Accept(0, 0, 0, proposalId, "some value");
 				const accepted0 = new Accepted(accept0);
 				this.learner.handleAccepted(accepted0);
 
-				const accept1 = new Accept(0, 1, proposalId, "some other value");
+				const accept1 = new Accept(0, 0, 1, proposalId, "some other value");
 				const accepted1 = new Accepted(accept1);
 				assert.throws(() => this.learner.handleAccepted(accepted1));
 			});
@@ -91,11 +94,11 @@ describe('Learner', function () {
 				const proposalIdOld = new ProposalId(0);
 				const proposalIdNew = new ProposalId(0);
 
-				const accept0 = new Accept(0, 0, proposalIdNew, "some value");
+				const accept0 = new Accept(0, 0, 0, proposalIdNew, "some value");
 				const accepted0 = new Accepted(accept0);
 				this.learner.handleAccepted(accepted0);
 
-				const accept1 = new Accept(0, 0, proposalIdOld, "some other value");
+				const accept1 = new Accept(0, 0, 0, proposalIdOld, "some other value");
 				const accepted1 = new Accepted(accept1);
 				this.learner.handleAccepted(accepted1);
 

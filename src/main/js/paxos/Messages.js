@@ -18,11 +18,13 @@ class ProposalId {
 }
 
 class Message {
+	_paxosInstanceNumber;
 	_sourceNodeId;
 	_targetNodeId;
 	_proposalId;
 
-	constructor(sourceNodeId, targetNodeId, proposalId) {
+	constructor(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId) {
+		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._sourceNodeId = sourceNodeId;
 		this._targetNodeId = targetNodeId;
 		this._proposalId = proposalId;
@@ -37,16 +39,32 @@ class Message {
 		return this._targetNodeId;
 	}
 
-
 	get proposalId() {
 		return this._proposalId;
+	}
+
+	get paxosInstanceNumber() {
+		return this._paxosInstanceNumber;
+	}
+}
+
+class MessageWithValue extends Message {
+	_value;
+
+	constructor(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId, value) {
+		super(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId);
+		this._value = value;
+	}
+
+	get value() {
+		return this._value;
 	}
 }
 
 class Prepare extends Message {
 
-	constructor(sourceNodeId, targetNodeId, proposalId) {
-		super(sourceNodeId, targetNodeId, proposalId);
+	constructor(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId) {
+		super(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId);
 		this._sourceNodeId = sourceNodeId;
 		this._targetNodeId = targetNodeId;
 	}
@@ -56,9 +74,9 @@ class Promise extends Message {
 	_lastAcceptedProposalId;
 	_lastAcceptedValue;
 
-	constructor(prepare, lastAcceptedProposalId, lastAcceptedValue) {
+	constructor(paxosInstanceNumber, prepare, lastAcceptedProposalId, lastAcceptedValue) {
 		// invert message source and target
-		super(prepare.targetNodeId, prepare.sourceNodeId, prepare.proposalId);
+		super(paxosInstanceNumber, prepare.targetNodeId, prepare.sourceNodeId, prepare.proposalId);
 		this._lastAcceptedProposalId = lastAcceptedProposalId;
 		this._lastAcceptedValue = lastAcceptedValue;
 	}
@@ -72,33 +90,26 @@ class Promise extends Message {
 	}
 }
 
-/**
- * aka Accept
- */
-class Accept extends Message {
-	_value;
-
-	constructor(sourceNodeId, targetNodeId, proposalId, value) {
-		super(sourceNodeId, targetNodeId, proposalId);
-		this._value = value;
-	}
-
-	get value() {
-		return this._value;
+class Accept extends MessageWithValue {
+	constructor(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId, value) {
+		super(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId, value);
 	}
 }
 
-/**
- * aka Accepted
- */
-class Accepted extends Accept {
+class Accepted extends MessageWithValue {
 	constructor(accept) {
 		// invert message source and target
-		super(accept.targetNodeId, accept.sourceNodeId, accept.proposalId, accept.value);
+		super(accept.paxosInstanceNumber, accept.targetNodeId, accept.sourceNodeId, accept.proposalId, accept.value);
+	}
+}
+
+class Resolution extends MessageWithValue {
+	constructor(accepted) {
+		// invert message source and target
+		super(accepted.paxosInstanceNumber, accepted.targetNodeId, accepted.sourceNodeId, accepted.proposalId, accepted.value);
 	}
 }
 
 //TODO support NACK??
-//TODO support Resolution? (Optional message used to indicate that the final value has been selected)
 
-export {ProposalId, Prepare, Promise, Accept, Accepted};
+export {ProposalId, Prepare, Promise, Accept, Accepted, Resolution};
