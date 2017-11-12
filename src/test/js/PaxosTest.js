@@ -1,5 +1,6 @@
 import Node, {allRoles} from "../../main/js/paxos/Node";
 import Cluster from "../../main/js/paxos/Cluster";
+import ImmediateDeliveryMessageHandler from "./mocks/ImmediateDeliveryMessageHandler";
 
 const assert = require('assert');
 
@@ -15,20 +16,18 @@ describe('Paxos in a 3 node cluster', () => {
 		this.node1 = new Node(1, allRoles);
 		this.node2 = new Node(2, allRoles);
 
-		this.cluster = new Cluster([
+		const allNodes = [
 			this.node0,
 			this.node1,
 			this.node2
-		]);
+		];
+		this.cluster = new Cluster(allNodes);
 
-		this.node0.setup(this.cluster);
-		this.node0.start();
-
-		this.node1.setup(this.cluster);
-		this.node1.start();
-
-		this.node2.setup(this.cluster);
-		this.node2.start();
+		const messageHandler = new ImmediateDeliveryMessageHandler(this.cluster);
+		allNodes.forEach(node => {
+			node.setup(this.cluster, messageHandler);
+			node.start();
+		});
 
 		this.proposer = this.cluster.proposers[0];
 	});

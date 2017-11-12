@@ -15,14 +15,15 @@ class Acceptor {
 	_acceptedProposalId;
 	_acceptedValue;
 	_paxosInstanceNumber;
+	_messageHandler;
 
-	constructor(paxosInstanceNumber, cluster) {
+	constructor(messageHandler, paxosInstanceNumber, cluster) {
+		this._messageHandler = messageHandler;
 		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._cluster = cluster;
 	}
 
 	handlePrepare(prepare) {
-		const proposer = this._findProposer(prepare.sourceNodeId);
 		const proposalId = prepare.proposalId;
 
 		let promise;
@@ -30,7 +31,7 @@ class Acceptor {
 			// accept prepare
 			promise = new Promise(this._paxosInstanceNumber, prepare, this._acceptedValue, this._acceptedProposalId);
 			this._promisedProposalId = proposalId;
-			proposer.handlePromise(promise)
+			this._messageHandler.send(promise);
 		} else {
 			// reject prepare
 			console.log(`I'm not preparing ${prepare}, already promised to ${this._promisedProposalId} and accepted ${this._acceptedProposalId}`)
@@ -41,14 +42,12 @@ class Acceptor {
 		const proposalId = accept.proposalId;
 		const value = accept.value;
 
-		let accepted;
 		if (this._honorsPromise(proposalId)) {
 			// accept accept
-			accepted = new Accepted(accept);
 			this._promisedProposalId = proposalId; // update proposal id number here too
 			this._acceptedProposalId = proposalId;
 			this._acceptedValue = value;
-			this._broadcastAccepted(accepted)
+			this._broadcastAccepted(accept)
 		} else {
 			//TODO should we also reject if a value has already been accepted?
 			// reject accept
@@ -56,9 +55,12 @@ class Acceptor {
 		}
 	}
 
-	_broadcastAccepted(accepted) {
+	_broadcastAccepted(accept) {
 		const learners = this._cluster.learners;
-		learners.forEach(learner => learner.handleAccepted(accepted));
+		learners.forEach(learner => {
+			const accepted = new Accepted(accept, learner.id);
+			this._messageHandler.send(accepted);
+		});
 	}
 
 	_honorsPromise(proposalId) {
@@ -67,18 +69,6 @@ class Acceptor {
 
 	_isAccepted(proposalId) {
 		return this._acceptedProposalId !== undefined && proposalId <= this._acceptedProposalId;
-	}
-
-	_findProposer(sourceNodeId) {
-		const proposer = this._cluster.proposers
-			.find(p => p.id === sourceNodeId);
-
-		if (proposer === undefined) {
-			console.log(`Don't know about proposer ${proposer}`);
-			return;
-		}
-
-		return proposer;
 	}
 }
 

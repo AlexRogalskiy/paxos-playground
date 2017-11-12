@@ -4,12 +4,13 @@ import Cluster from "../../main/js/paxos/Cluster";
 import LearnerMock from "./mocks/LearnerMock";
 import {Accept, Prepare, ProposalId} from "../../main/js/paxos/Messages";
 import Acceptor from "../../main/js/paxos/Acceptor";
+import ImmediateDeliveryMessageHandler from "./mocks/ImmediateDeliveryMessageHandler";
 
 const assert = require('assert');
 const allRoles = [Role.PROPOSER, Role.ACCEPTOR, Role.LEARNER];
 
-const _mockSetupAndStart = (node, cluster) => {
-	node.setup(cluster);
+const _mockSetupAndStart = (node, cluster, messageHandler) => {
+	node.setup(cluster, messageHandler);
 	node._paxosInstance._proposer = new ProposerMock();
 	node._paxosInstance._learner = new LearnerMock();
 	node.start();
@@ -19,21 +20,17 @@ describe('Acceptor', function () {
 
 	describe('An acceptor in a 3 node cluster', function () {
 		beforeEach(function () {
-			this.node0 = new Node(0, allRoles);
-			this.node1 = new Node(1, allRoles);
-			this.node2 = new Node(2, allRoles);
-
-			const allNodes = [
-				this.node0,
-				this.node1,
-				this.node2
-			];
+			const allNodes = [];
+			for (let i = 0; i < 3; i++) {
+				allNodes.push(new Node(i, allRoles));
+			}
 
 			this.cluster = new Cluster(allNodes);
 
-			allNodes.forEach((node) => _mockSetupAndStart(node, this.cluster));
+			const messageHandler = new ImmediateDeliveryMessageHandler(this.cluster);
+			allNodes.forEach((node) => _mockSetupAndStart(node, this.cluster, messageHandler));
 
-			this.acceptor = new Acceptor(0, this.cluster);
+			this.acceptor = new Acceptor(messageHandler, 0, this.cluster);
 		});
 
 		describe('handlePrepare()', function () {

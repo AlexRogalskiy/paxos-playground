@@ -27,6 +27,10 @@ class Cluster {
 		return this._nodes.filter(node => node.roles.includes(role))
 	}
 
+
+	get nodes() {
+		return this._nodes;
+	}
 }
 
 export default Cluster;

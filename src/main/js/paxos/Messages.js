@@ -97,9 +97,9 @@ class Accept extends MessageWithValue {
 }
 
 class Accepted extends MessageWithValue {
-	constructor(accept) {
+	constructor(accept, targetId) {
 		// invert message source and target
-		super(accept.paxosInstanceNumber, accept.targetNodeId, accept.sourceNodeId, accept.proposalId, accept.value);
+		super(accept.paxosInstanceNumber, accept.targetNodeId, targetId, accept.proposalId, accept.value);
 	}
 }
 

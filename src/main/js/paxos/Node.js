@@ -10,6 +10,7 @@ class Node {
 
 	_cluster;
 	_paxosInstance;
+	_messageHandler;
 
 	constructor(id, roles) {
 		this._id = id;
@@ -18,11 +19,12 @@ class Node {
 		this._log = [];
 	}
 
-	setup(cluster) {
+	setup(cluster, messageHandler) {
 		this._cluster = cluster;
+		this._messageHandler = messageHandler;
 
 		//Initial paxos instance creation
-		this._paxosInstance = new PaxosInstance(0, this.id, cluster);
+		this._paxosInstance = new PaxosInstance(this._messageHandler, 0, this.id, cluster);
 	}
 
 	start() {
@@ -38,6 +40,10 @@ class Node {
 	}
 
 	// ---- PROPOSER ----
+
+	clientRequest(value) {
+		this.prepareValue(value);
+	}
 
 	prepareValue(value) {
 		if (this._isDown()) return;
@@ -82,7 +88,7 @@ class Node {
 
 			//advance paxos instance
 			const newInstanceNumber = this._paxosInstance.paxosInstanceNumber + 1;
-			this._paxosInstance = new PaxosInstance(newInstanceNumber, this.id, this._cluster)
+			this._paxosInstance = new PaxosInstance(this._messageHandler, newInstanceNumber, this.id, this._cluster)
 		}
 	}
 
@@ -112,11 +118,11 @@ class PaxosInstance {
 	_acceptor;
 	_learner;
 
-	constructor(paxosInstanceNumber, id, cluster) {
+	constructor(messageHandler, paxosInstanceNumber, id, cluster) {
 		this._paxosInstanceNumber = paxosInstanceNumber;
-		this._proposer = new Proposer(this._paxosInstanceNumber, cluster, id);
-		this._acceptor = new Acceptor(this._paxosInstanceNumber, cluster);
-		this._learner = new Learner(this._paxosInstanceNumber, cluster);
+		this._proposer = new Proposer(messageHandler, this._paxosInstanceNumber, cluster, id);
+		this._acceptor = new Acceptor(messageHandler, this._paxosInstanceNumber, cluster);
+		this._learner = new Learner(messageHandler, this._paxosInstanceNumber, cluster);
 	}
 
 

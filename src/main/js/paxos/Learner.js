@@ -12,8 +12,10 @@ class Learner {
 
 	_finalResolution;
 	_paxosInstanceNumber;
+	_messageHandler;
 
-	constructor(paxosInstanceNumber, cluster) {
+	constructor(messageHandler, paxosInstanceNumber, cluster) {
+		this._messageHandler = messageHandler;
 		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._cluster = cluster;
 		this._proposalMap = new Map();
