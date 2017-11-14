@@ -42,14 +42,19 @@ class UiMessageHandler extends MessageHandler {
 	}
 
 	send(message) {
+		const sendTime = this._model.time;
+		const recvTime = this._calculateRecvTime();
+		const dropTime = this._calculateDropTime(recvTime, sendTime);
+		
 		Object.assign(message, {
-			sendTime: this._model.time,
-			recvTime: this._calculateRecvTime(),
-			dropTime: this._calculateDropTime(),
+			sendTime: sendTime,
+			recvTime: recvTime,
+			dropTime: dropTime,
 			from: message.sourceNodeId,
 			to: message.targetNodeId,
 			direction: UiMessageHandler._calculateDirection(message),
-			type: message.constructor.name
+			type: message.constructor.name,
+			term: message.paxosInstanceNumber
 		});
 		this._inFlightMessages.push(message);
 
@@ -65,9 +70,9 @@ class UiMessageHandler extends MessageHandler {
 			Math.random() * (MAX_RPC_LATENCY - MIN_RPC_LATENCY);
 	}
 
-	_calculateDropTime() {
+	_calculateDropTime(recvTime, sendTime) {
 		if (Math.random() < this._model.channelNoise) {
-			return (message.recvTime - message.sendTime) * util.randomBetween(1 / 3, 3 / 4) + message.sendTime;
+			return (recvTime - sendTime) * util.randomBetween(1 / 3, 3 / 4) + sendTime;
 		}
 	}
 
