@@ -111,6 +111,10 @@ class Node {
 	get log() {
 		return this._log;
 	}
+
+	get paxosInstanceNumber() {
+		return this._paxosInstance.paxosInstanceNumber;
+	}
 }
 
 class PaxosInstance {
