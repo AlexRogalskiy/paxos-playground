@@ -48,9 +48,15 @@ class UiMessageHandler extends MessageHandler {
 			dropTime: this._calculateDropTime(),
 			from: message.sourceNodeId,
 			to: message.targetNodeId,
-			direction: UiMessageHandler._calculateDirection(message)
+			direction: UiMessageHandler._calculateDirection(message),
+			type: message.constructor.name
 		});
 		this._inFlightMessages.push(message);
+
+		if (message.sourceNodeId === message.targetNodeId) {
+			// deliver messages to myself immediately
+			this.deliver(message);
+		}
 	}
 
 	_calculateRecvTime() {
@@ -67,12 +73,14 @@ class UiMessageHandler extends MessageHandler {
 
 	static _calculateDirection(message) {
 		switch (message.constructor) {
-			case Prepare || Accept:
+			case Prepare:
+			case Accept:
 				return REQUEST;
-			case Promise || Accepted:
+			case Promise :
+			case Accepted:
 				return REPLY;
 			default:
-				console.log(`Don't know how to handle message ${message}`)
+				console.log(`Don't know how to handle message ${typeof message}`)
 		}
 	}
 

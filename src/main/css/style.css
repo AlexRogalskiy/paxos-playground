@@ -89,14 +89,25 @@ svg .message {
     stroke-width: 3;
 }
 
-svg .message.RequestVote {
+// color palette: http://www.color-hex.com/color-palette/25500
+svg .message.Prepare {
     fill: #66c2a5;
     stroke: #66c2a5;
 }
 
-svg .message.AppendEntries {
+svg .message.Promise {
     fill: #fc8d62;
     stroke: #fc8d62;
+}
+
+svg .message.Accept {
+  fill: #8da0cb;
+  stroke: #8da0cb;
+}
+
+svg .message.Accepted {
+  fill: #e78ac3;
+  stroke: #e78ac3;
 }
 
 svg .message.request circle {

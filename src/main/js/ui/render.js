@@ -267,14 +267,16 @@ $(function () {
 			});
 		}
 		state.current.messages.forEach(function (message, i) {
-			var s = messageSpec(message.from, message.to,
+			const s = messageSpec(message.from, message.to,
 				(state.current.time - message.sendTime) /
 				(message.recvTime - message.sendTime));
 			$('#message-' + i + ' circle', messagesGroup).attr(s);
-			if (message.direction == 'reply') {
-				var dlist = [];
+			if (message.direction === 'reply') {
+				const dlist = [];
+				// TODO decide how to render replies
 				dlist.push('M', s.cx - s.r, comma, s.cy,
 					'L', s.cx + s.r, comma, s.cy);
+				//This adds the other line to convert - into +
 				if ((message.type == 'RequestVote' && message.granted) ||
 					(message.type == 'AppendEntries' && message.success)) {
 					dlist.push('M', s.cx, comma, s.cy - s.r,
@@ -283,7 +285,7 @@ $(function () {
 				$('#message-' + i + ' path.message-success', messagesGroup)
 					.attr('d', dlist.join(' '));
 			}
-			var dir = $('#message-' + i + ' path.message-direction', messagesGroup);
+			const dir = $('#message-' + i + ' path.message-direction', messagesGroup);
 			if (playback.isPaused()) {
 				dir.attr('style', 'marker-end:url(#TriangleOutS-' + message.type + ')')
 					.attr('d',
