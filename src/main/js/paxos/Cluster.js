@@ -1,7 +1,7 @@
-import {Role} from "./Node";
+import {Role} from "./Node.js";
 
 class Cluster {
-	_nodes;
+	// _nodes;
 
 	constructor(nodes) {
 		this._nodes = nodes

@@ -1,16 +1,16 @@
-import {Accept, Prepare, ProposalId} from "./Messages";
+import {Accept, Prepare, ProposalId} from "./Messages.js";
 
 class Proposer {
-	_isLeader; //this represents the node belief. Might be inaccurate
-	_cluster;
-	_nodeId;
-	_currentProposal;
-	_acceptSent;
-	_paxosInstanceNumber;
-	_messageHandler;
+	// _isLeader; //this represents the node belief. Might be inaccurate
+	// _cluster;
+	// _nodeId;
+	// _currentProposal;
+	// _acceptSent;
+	// _paxosInstanceNumber;
+	// _messageHandler;
 
 	constructor(messageHandler, paxosInstanceNumber, cluster, nodeId) {
-		this._messageHandler = messageHandler;
+		this.messageHandler = messageHandler;
 		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._nodeId = nodeId;
 		this._cluster = cluster;
@@ -19,7 +19,7 @@ class Proposer {
 	}
 
 	prepareValue(value) {
-		const proposal = new Proposal(this._messageHandler, this._paxosInstanceNumber, this._nodeId, this._cluster, value);
+		const proposal = new Proposal(this.messageHandler, this._paxosInstanceNumber, this._nodeId, this._cluster, value);
 		this._currentProposal = proposal;
 		proposal.broadcastPrepare();
 	}
@@ -39,17 +39,17 @@ class Proposer {
 }
 
 class Proposal {
-	_nodeId;
-	_proposalId;
-	_participantAcceptors;
-	_promisesMap;
-	_quorum;
-	_proposedValue;
-	_paxosInstanceNumber;
-	_messageHandler;
+	// _nodeId;
+	// _proposalId;
+	// _participantAcceptors;
+	// _promisesMap;
+	// _quorum;
+	// _proposedValue;
+	// _paxosInstanceNumber;
+	// _messageHandler;
 
 	constructor(messageHandler, paxosInstanceNumber, nodeId, cluster, value) {
-		this._messageHandler = messageHandler;
+		this.messageHandler = messageHandler;
 		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._nodeId = nodeId;
 		this._proposalId = new ProposalId(nodeId);
@@ -76,14 +76,14 @@ class Proposal {
 	broadcastPrepare() {
 		this._participantAcceptors.forEach(acceptor => {
 			const prepare = new Prepare(this._paxosInstanceNumber, this._nodeId, acceptor.id, this._proposalId);
-			this._messageHandler.send(prepare);
+			this.messageHandler.send(prepare);
 		})
 	}
 
 	broadcastAccept() {
 		this._participantAcceptors.forEach(acceptor => {
 			const prepare = new Accept(this._paxosInstanceNumber, this._nodeId, acceptor.id, this.proposalId, this._calculateProposalValue());
-			this._messageHandler.send(prepare);
+			this.messageHandler.send(prepare);
 		})
 	}
 

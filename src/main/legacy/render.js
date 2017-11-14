@@ -149,6 +149,7 @@ $(function () {
     render.servers = function (serversSame) {
         state.current.servers.forEach(function (server) {
             var serverNode = $('#server-' + server.id, svg);
+	        //Rendering election timer?
             $('path', serverNode)
                 .attr('d', arcSpec(serverSpec(server.id),
                     util.clamp((server.electionAlarm - state.current.time) /
@@ -368,6 +369,7 @@ $(function () {
 
         var leader = raft.getLeader(model);
         if (leader !== null) $('#cell-' + leader.id + '-0').addClass('leader');
+	    //I don't need to render matchIndex/nextIndex
         model.servers.forEach(function(server) {
             if (leader !== null && leader != server) {
                 $('#cell-' + server.id + '-' + leader.matchIndex[server.id])

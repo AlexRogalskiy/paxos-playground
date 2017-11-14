@@ -3,19 +3,19 @@
  * selected, and tracks which peers have accepted the final value.
  */
 
-import {Resolution} from "./Messages";
+import {Resolution} from "./Messages.js";
 
 class Learner {
-	_proposalMap;
-	_cluster;
-	_lastAcceptedProposalsMap; // nodeId -> lastAcceptedProposalId
-
-	_finalResolution;
-	_paxosInstanceNumber;
-	_messageHandler;
+	// _proposalMap;
+	// _cluster;
+	// _lastAcceptedProposalsMap; // nodeId -> lastAcceptedProposalId
+	//
+	// _finalResolution;
+	// _paxosInstanceNumber;
+	// _messageHandler;
 
 	constructor(messageHandler, paxosInstanceNumber, cluster) {
-		this._messageHandler = messageHandler;
+		this.messageHandler = messageHandler;
 		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._cluster = cluster;
 		this._proposalMap = new Map();
@@ -89,9 +89,9 @@ class Learner {
 }
 
 class Proposal {
-	_acceptedSet;
-	_quorum;
-	_proposalValue;
+	// _acceptedSet;
+	// _quorum;
+	// _proposalValue;
 
 	constructor(_quorum) {
 		this._acceptedSet = new Set();

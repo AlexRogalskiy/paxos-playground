@@ -15,6 +15,7 @@
 var state;
 var INITIAL_SERVER_NUMBER = 4;
 
+//this is just short-hand to call document.onReady(function)
 $(function () {
 
     // Initializes servers and state

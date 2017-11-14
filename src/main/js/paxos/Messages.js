@@ -1,8 +1,8 @@
 let proposalNumber = 0; //Global proposal number. Maybe this is cheating a little bit...
 
 class ProposalId {
-	_proposalNumber;
-	_nodeId;
+	// _proposalNumber;
+	// _nodeId;
 
 	constructor(nodeId) {
 		this._proposalNumber = proposalNumber++;
@@ -18,10 +18,10 @@ class ProposalId {
 }
 
 class Message {
-	_paxosInstanceNumber;
-	_sourceNodeId;
-	_targetNodeId;
-	_proposalId;
+	// _paxosInstanceNumber;
+	// _sourceNodeId;
+	// _targetNodeId;
+	// _proposalId;
 
 	constructor(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId) {
 		this._paxosInstanceNumber = paxosInstanceNumber;
@@ -49,7 +49,7 @@ class Message {
 }
 
 class MessageWithValue extends Message {
-	_value;
+	// _value;
 
 	constructor(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId, value) {
 		super(paxosInstanceNumber, sourceNodeId, targetNodeId, proposalId);
@@ -71,8 +71,8 @@ class Prepare extends Message {
 }
 
 class Promise extends Message {
-	_lastAcceptedProposalId;
-	_lastAcceptedValue;
+	// _lastAcceptedProposalId;
+	// _lastAcceptedValue;
 
 	constructor(paxosInstanceNumber, prepare, lastAcceptedProposalId, lastAcceptedValue) {
 		// invert message source and target

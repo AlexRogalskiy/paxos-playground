@@ -1,16 +1,16 @@
-import Proposer from "./Proposer";
-import Acceptor from "./Acceptor";
-import Learner from "./Learner";
+import Proposer from "./Proposer.js";
+import Acceptor from "./Acceptor.js";
+import Learner from "./Learner.js";
 
 class Node {
-	_id;
-	_roles;
-	_state;
-	_log;
-
-	_cluster;
-	_paxosInstance;
-	_messageHandler;
+	// _id;
+	// _roles;
+	// _state;
+	// _log;
+	//
+	// _cluster;
+	// _paxosInstance;
+	// _messageHandler;
 
 	constructor(id, roles) {
 		this._id = id;
@@ -21,10 +21,10 @@ class Node {
 
 	setup(cluster, messageHandler) {
 		this._cluster = cluster;
-		this._messageHandler = messageHandler;
+		this.messageHandler = messageHandler;
 
 		//Initial paxos instance creation
-		this._paxosInstance = new PaxosInstance(this._messageHandler, 0, this.id, cluster);
+		this._paxosInstance = new PaxosInstance(this.messageHandler, 0, this.id, cluster);
 	}
 
 	start() {
@@ -88,7 +88,7 @@ class Node {
 
 			//advance paxos instance
 			const newInstanceNumber = this._paxosInstance.paxosInstanceNumber + 1;
-			this._paxosInstance = new PaxosInstance(this._messageHandler, newInstanceNumber, this.id, this._cluster)
+			this._paxosInstance = new PaxosInstance(this.messageHandler, newInstanceNumber, this.id, this._cluster)
 		}
 	}
 
@@ -114,9 +114,9 @@ class Node {
 }
 
 class PaxosInstance {
-	_proposer;
-	_acceptor;
-	_learner;
+	// _proposer;
+	// _acceptor;
+	// _learner;
 
 	constructor(messageHandler, paxosInstanceNumber, id, cluster) {
 		this._paxosInstanceNumber = paxosInstanceNumber;

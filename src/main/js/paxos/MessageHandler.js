@@ -1,21 +1,23 @@
-import {Accept, Accepted, Prepare, Promise} from "./Messages";
+import {Accept, Accepted, Prepare, Promise} from "./Messages.js";
 
 class MessageHandler {
-	_inFlightMessages;
-	_cluster;
+	// _inFlightMessages;
+	// _cluster;
 
 	constructor(cluster) {
 		this._cluster = cluster;
-		this._inFlightMessages = new Set();
+		this._inFlightMessages = [];
 	}
 
 	send(message) {
-		this._inFlightMessages.add(message);
+		this._inFlightMessages.push(message);
 	}
 
 	deliver(message) {
-		const wasRemoved = this._inFlightMessages.delete(message);
-		if (wasRemoved) {
+		const index = this._inFlightMessages.indexOf(message);
+		if (index > -1) {
+			this._inFlightMessages.splice(index, 1);
+
 			const targetNode = this._cluster.nodes[message.targetNodeId];
 
 			if (targetNode === undefined) {

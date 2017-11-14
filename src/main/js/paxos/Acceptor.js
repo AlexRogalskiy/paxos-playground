@@ -1,4 +1,4 @@
-import {Accepted, Promise, ProposalId, Reply} from "./Messages";
+import {Accepted, Promise, ProposalId} from "./Messages.js";
 
 /**
  * Acceptors act as the fault-tolerant memory for Paxos. To ensure correctness
@@ -8,17 +8,17 @@ import {Accepted, Promise, ProposalId, Reply} from "./Messages";
  * stable media prior to sending promise and accepted messages.
  */
 class Acceptor {
-	_cluster;
-
-	//Non-volatile fields
-	_promisedProposalId;
-	_acceptedProposalId;
-	_acceptedValue;
-	_paxosInstanceNumber;
-	_messageHandler;
+	// _cluster;
+	//
+	// //Non-volatile fields
+	// _promisedProposalId;
+	// _acceptedProposalId;
+	// _acceptedValue;
+	// _paxosInstanceNumber;
+	// _messageHandler;
 
 	constructor(messageHandler, paxosInstanceNumber, cluster) {
-		this._messageHandler = messageHandler;
+		this.messageHandler = messageHandler;
 		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._cluster = cluster;
 	}
@@ -31,7 +31,7 @@ class Acceptor {
 			// accept prepare
 			promise = new Promise(this._paxosInstanceNumber, prepare, this._acceptedValue, this._acceptedProposalId);
 			this._promisedProposalId = proposalId;
-			this._messageHandler.send(promise);
+			this.messageHandler.send(promise);
 		} else {
 			// reject prepare
 			console.log(`I'm not preparing ${prepare}, already promised to ${this._promisedProposalId} and accepted ${this._acceptedProposalId}`)
@@ -59,7 +59,7 @@ class Acceptor {
 		const learners = this._cluster.learners;
 		learners.forEach(learner => {
 			const accepted = new Accepted(accept, learner.id);
-			this._messageHandler.send(accepted);
+			this.messageHandler.send(accepted);
 		});
 	}
 

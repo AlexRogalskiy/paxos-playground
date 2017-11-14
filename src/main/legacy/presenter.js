@@ -183,6 +183,7 @@ $(function () {
         });
     };
 
+	//TODO scenarios not implemented yet
     raft.setupLogReplicationScenario = function (model) {
         var s1 = model.servers[0];
         raft.restart(model, model.servers[1]);

@@ -68,7 +68,7 @@ var NEXT_SERVER_ID = 1;
         var peers = [];
         for (var i=1; i <= INITIAL_SERVER_NUMBER; i++)
             if (i != my_id)
-                peers.push(i);
+	            peers.push(i); //Setting the peers for this node
 
         return {
             id: my_id,
@@ -330,17 +330,22 @@ var NEXT_SERVER_ID = 1;
 
 
     raft.update = function (model) {
+	    // Leader election - not implemented yet
         model.servers.forEach(function (server) {
             rules.startNewElection(model, server);
             rules.becomeLeader(model, server);
         });
 
+	    // Advance commit index - not needed
         var leader = raft.getLeader(model);
         if (leader) rules.advanceCommitIndex(model, leader);
 
         model.servers.forEach(function (server) {
             server.peers.forEach(function (peer) {
+	            // Leadership voting -  not implemented yet
                 rules.sendRequestVote(model, server, peer);
+	            // This calculates when it needs to send appendEntries messages (checks timeouts, log sizes etc).
+	            // This logic is already part of paxos implementation on my case
                 rules.sendAppendEntries(model, server, peer);
             });
         });
@@ -362,6 +367,7 @@ var NEXT_SERVER_ID = 1;
             });
         });
 
+	    // Handle server removal - Not implemented yet
         var n = 0;
         $.each(model.deadServersWalking, function(){n++;});
         if (n) {

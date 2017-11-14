@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Raft Scope</title>
+        <title>Paxos Scope</title>
 
         <!-- bootstrap 3.3.7 -->
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -12,7 +12,7 @@
         <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/css/bootstrap-slider.min.css" rel="stylesheet">
 
         <!-- project css -->
-        <link href="style.css" rel="stylesheet">
+        <link href="../css/style.css" rel="stylesheet">
     </head>
     <body>
         <div class="container">
@@ -26,7 +26,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="#">Raft Scope</a>
+                        <a class="navbar-brand" href="#">Paxos Scope</a>
                     </div>
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
@@ -109,7 +109,8 @@
                             data-slider-min="0" data-slider-max="1" data-slider-step=".001" data-slider-value="0">
                         </div>
                     </div>
-                    <div class="row">
+                    <!--Not implemented yet -->
+                    <!--<div class="row">
                         <div class="col-sm-12">
                             <p>Pending cluster change requests</p>
                             <div class="row">
@@ -123,7 +124,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
                 </div>
                 <!-- /.slider - right side-->
             </div>
@@ -258,11 +259,14 @@
         <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
         <!-- project stuff -->
-        <script src="util.js"></script>
-        <script src="state.js"></script>
-        <script src="raft.js"></script>
-        <script src="render.js"></script>
-        <script src="presenter.js"></script>
-        <script src="script.js"></script>
+        <script src="../js/ui/util.js"></script>
+        <script src="../js/ui/state.js"></script>
+        <script src="../js/ui/paxos.js"></script>
+        <script src="../js/ui/render.js"></script>
+        <script src="../js/ui/presenter.js"></script>
+        <script type="module" src="../js/paxos/Cluster.js"></script>
+        <script type="module" src="../js/paxos/Node.js"></script>
+        <script type="module" src="../js/ui/UiMessageHandler.js"></script>
+        <script type="module" src="../js/ui/script.js"></script>
     </body>
 </html>
