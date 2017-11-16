@@ -7,7 +7,7 @@ const assert = require('assert');
 const _checkLogValues = (node, ...values) => {
 	const nodeLog = node.log;
 	assert.equal(values.length, nodeLog.length);
-	values.forEach((value, idx) => assert.equal(value, nodeLog[idx]));
+	values.forEach((value, idx) => assert.equal(value, nodeLog[idx].value));
 };
 
 describe('Paxos in a 3 node cluster', () => {

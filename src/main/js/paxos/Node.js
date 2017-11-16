@@ -84,7 +84,10 @@ class Node {
 
 		if (resolution !== undefined && this._isFromCurrentPaxosInstance(resolution)) {
 			//store final value
-			this._log.push(resolution.value);
+			this._log.push({
+				value: resolution.value,
+				paxosInstanceNumber: this.paxosInstanceNumber
+			});
 
 			//advance paxos instance
 			const newInstanceNumber = this._paxosInstance.paxosInstanceNumber + 1;

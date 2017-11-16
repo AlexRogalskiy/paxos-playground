@@ -326,18 +326,17 @@ $(function () {
 				var buff = [];
 				Array.prototype.push.apply(
 					buff,
-					model.servers.map(function (server) {
-						var line = ['<tr><td id="cell-', server.id, '-0">S',
+					model.servers.map(server => {
+						const line = ['<tr><td id="cell-', server.id, '-0">S',
 							server.id, '</td>'];
-						for (var array_id = 0; array_id < DISPLAY_LE_CURRENT; array_id++) {
-							var log_id = array_id + 1;
+						for (let array_id = 0; array_id < DISPLAY_LE_CURRENT; array_id++) {
+							const log_id = array_id + 1;
 							Array.prototype.push.apply(line,
 								['<td id="cell-', server.id, '-', log_id, '" ']);
 							if (array_id < server.log.length) {
 								Array.prototype.push.apply(line, [
-									'class="',
-									(log_id <= server.commitIndex ? '' : 'un') + 'committed ',
-									'color-', server.log[array_id].term % 10,
+									'class= "commited ',
+									'color-', server.log[array_id].paxosInstanceNumber % 10,
 									server.log[array_id].isConfig ? ' config' : '',
 									server.log[array_id].isNoop ? ' noop' : '',
 								]);
@@ -345,7 +344,7 @@ $(function () {
 							Array.prototype.push.apply(line, [
 								'">',
 								(array_id >= server.log.length ? '' : (
-									server.log[array_id].term +
+									server.log[array_id].paxosInstanceNumber +
 									(!server.log[array_id].isConfig ? '' : (
 										'C<sub>' +
 										(server.log[array_id].isAdd ? '+' : '-') +
@@ -364,8 +363,9 @@ $(function () {
 			'</tbody></table>'
 		].join(''));
 
-		const leader = paxos.getLeader(model);
-		if (leader !== null) $('#cell-' + leader.id + '-0').addClass('leader');
+		// No need to mark the leader - not implemented yet
+		// const leader = paxos.getLeader(model);
+		// if (leader !== null) $('#cell-' + leader.id + '-0').addClass('leader');
 
 		if (scroll) cnt.scrollLeft(cnt.width());
 	};
