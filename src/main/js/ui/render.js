@@ -155,7 +155,7 @@ $(function () {
 					.removeClass(function (index, css) {
 						return (css.match(/(^|\s)color-\S+/g) || []).join(' ');
 					}).addClass(
-					server.state === 'stopped' ?
+					server.isDown() ?
 						'color-stopped' : 'color-' + server.term % 10);
 				var votesGroup = $('.votes', serverNode);
 				votesGroup.empty();
@@ -547,7 +547,6 @@ $(function () {
 		['stop', paxos.stop],
 		['resume', paxos.resume],
 		['restart', paxos.restart],
-		['time out', paxos.timeout],
 		['request', paxos.clientRequest],
 		['remove', paxos.removeServer],
 	];

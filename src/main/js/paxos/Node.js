@@ -46,13 +46,13 @@ class Node {
 	}
 
 	prepareValue(value) {
-		if (this._isDown()) return;
+		if (this.isDown()) return;
 
 		this._paxosInstance.proposer.prepareValue(value)
 	}
 
 	handlePromise(promise) {
-		if (this._isDown()) return;
+		if (this.isDown()) return;
 		if (!this._isFromCurrentPaxosInstance(promise)) return;
 
 		this._paxosInstance.proposer.handlePromise(promise);
@@ -61,14 +61,14 @@ class Node {
 	// ---- ACCEPTOR ----
 
 	handlePrepare(prepare) {
-		if (this._isDown()) return;
+		if (this.isDown()) return;
 		if (!this._isFromCurrentPaxosInstance(prepare)) return;
 
 		this._paxosInstance.acceptor.handlePrepare(prepare);
 	}
 
 	handleAccept(accept) {
-		if (this._isDown()) return;
+		if (this.isDown()) return;
 		if (!this._isFromCurrentPaxosInstance(accept)) return;
 
 		this._paxosInstance.acceptor.handleAccept(accept);
@@ -77,7 +77,7 @@ class Node {
 	// ---- LEARNER ----
 
 	handleAccepted(accepted) {
-		if (this._isDown()) return;
+		if (this.isDown()) return;
 		if (!this._isFromCurrentPaxosInstance(accepted)) return;
 
 		const resolution = this._paxosInstance.learner.handleAccepted(accepted);
@@ -95,7 +95,7 @@ class Node {
 		}
 	}
 
-	_isDown() {
+	isDown() {
 		return this._state === State.DOWN;
 	}
 
@@ -159,7 +159,7 @@ export const Role = {
 export const allRoles = [Role.PROPOSER, Role.ACCEPTOR, Role.LEARNER];
 
 export const State = {
-	UP: Symbol("proposer"),
+	UP: Symbol("up"),
 	DOWN: Symbol("down"),
 };
 
