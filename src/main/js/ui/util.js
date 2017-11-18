@@ -136,7 +136,7 @@ util.relativeTime = function (time, now) {
 };
 
 util.getButton = function (label) {
-	return $('<button type="button" class="btn btn-default"></button>').text(label);
+	return $(`<button type="button" class="btn btn-default" value="${label}"></button>`).text(label);
 };
 
 util.srvArraySub = function (a, b) {

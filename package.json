@@ -8,10 +8,14 @@
   "dependencies": {
     "babel-core": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
+    "cypress": "^1.0.3",
+    "http-server": "^0.10.0",
     "mocha": "^4.0.1"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register src/test/js"
+    "test": "mocha --compilers js:babel-core/register src/test/js",
+    "cypress:open": "cypress open",
+    "http-server": "http-server src"
   },
   "devDependencies": {
     "babel-plugin-transform-class-properties": "^6.24.1"

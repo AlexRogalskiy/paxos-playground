@@ -199,9 +199,10 @@ $(function () {
 						var list = $('ul', this.getMenu());
 						list.empty();
 						serverActions.forEach(function (action) {
+							const actionName = action[0];
 							list.append($('<li></li>')
-								.append($('<a href="#"></a>')
-									.text(action[0])
+								.append($(`<a href="#" name="${actionName}"></a>`)
+									.text(actionName)
 									.click(function () {
 										state.fork();
 										action[1](server);
@@ -613,7 +614,7 @@ $(function () {
 				.click(function () {
 					state.fork();
 					// action[1] == callback
-					action[1](model, server);
+					action[1](server);
 					state.save();
 					render.update();
 					m.modal('hide');
