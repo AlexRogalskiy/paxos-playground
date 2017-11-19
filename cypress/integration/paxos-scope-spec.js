@@ -81,11 +81,13 @@ describe('Paxos Scope', function () {
 		});
 	});
 
-	describe('Request value concurrently', function () {
+	describe('Request value with only 2 nodes', function () {
 		before(function () {
 			cy.visit('/');
 
-			//right click
+			stopNode(2);
+			stopNode(3);
+
 			requestValue(0);
 		});
 

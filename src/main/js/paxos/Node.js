@@ -2,6 +2,13 @@ import Proposer from "./Proposer.js";
 import Acceptor from "./Acceptor.js";
 import Learner from "./Learner.js";
 
+/**
+ * Models a paxos node. Responsibilities:
+ *  - Handle the log state
+ *  - Handle the node state
+ *  - Advance paxos instance
+ *  - Enforce messages are from the current paxos instance.
+ */
 class Node {
 	// _id;
 	// _roles;
@@ -47,12 +54,14 @@ class Node {
 
 	prepareValue(value) {
 		if (this.isDown()) return;
+		if (!this.roles.includes(Role.PROPOSER)) return;
 
 		this._paxosInstance.proposer.prepareValue(value)
 	}
 
 	handlePromise(promise) {
 		if (this.isDown()) return;
+		if (!this.roles.includes(Role.PROPOSER)) return;
 		if (!this._isFromCurrentPaxosInstance(promise)) return;
 
 		this._paxosInstance.proposer.handlePromise(promise);
@@ -62,6 +71,7 @@ class Node {
 
 	handlePrepare(prepare) {
 		if (this.isDown()) return;
+		if (!this.roles.includes(Role.ACCEPTOR)) return;
 		if (!this._isFromCurrentPaxosInstance(prepare)) return;
 
 		this._paxosInstance.acceptor.handlePrepare(prepare);
@@ -69,6 +79,7 @@ class Node {
 
 	handleAccept(accept) {
 		if (this.isDown()) return;
+		if (!this.roles.includes(Role.ACCEPTOR)) return;
 		if (!this._isFromCurrentPaxosInstance(accept)) return;
 
 		this._paxosInstance.acceptor.handleAccept(accept);
@@ -78,6 +89,7 @@ class Node {
 
 	handleAccepted(accepted) {
 		if (this.isDown()) return;
+		if (!this.roles.includes(Role.LEARNER)) return;
 		if (!this._isFromCurrentPaxosInstance(accepted)) return;
 
 		const resolution = this._paxosInstance.learner.handleAccepted(accepted);
