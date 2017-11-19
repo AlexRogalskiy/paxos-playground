@@ -11,9 +11,10 @@
 /* global util */
 /* global speedSlider */
 'use strict';
-import Node, {allRoles} from "../paxos/Node.js";
+import {allRoles} from "../paxos/Node.js";
 import Cluster from "../paxos/Cluster.js";
 import UiMessageHandler from "./UiMessageHandler.js";
+import NodeWithSync from "../paxos/SyncStrategy.js";
 
 //this is just short-hand to call document.onReady(function)
 $(function () {
@@ -34,7 +35,8 @@ $(function () {
 	(function () {
 		const allNodes = [];
 		for (let i = 0; i < INITIAL_SERVER_NUMBER; i++) {
-			allNodes.push(new Node(i, allRoles));
+			//TODO make this configurable
+			allNodes.push(new NodeWithSync(i, allRoles));
 		}
 
 		const cluster = new Cluster(allNodes);

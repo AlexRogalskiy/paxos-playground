@@ -1,4 +1,4 @@
-import {Accept, Accepted, Prepare, Promise} from "./Messages.js";
+import {Accept, Accepted, CatchUp, Prepare, Promise, SyncRequest} from "./Messages.js";
 
 class MessageHandler {
 	// _inFlightMessages;
@@ -37,6 +37,12 @@ class MessageHandler {
 					break;
 				case Accepted:
 					targetNode.handleAccepted(message);
+					break;
+				case SyncRequest:
+					targetNode.handleSyncRequest(message);
+					break;
+				case CatchUp:
+					targetNode.handleCatchup(message);
 					break;
 				default:
 					console.log(`Don't know how to handle message ${message}`)

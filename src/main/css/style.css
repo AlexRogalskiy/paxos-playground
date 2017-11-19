@@ -96,18 +96,28 @@ svg .message.Prepare {
 }
 
 svg .message.Promise {
-    fill: #fc8d62;
-    stroke: #fc8d62;
+  fill: #66c2a5;
+  stroke: #66c2a5;
 }
 
 svg .message.Accept {
-  fill: #8da0cb;
-  stroke: #8da0cb;
+  fill: #e78ac3;
+  stroke: #e78ac3;
 }
 
 svg .message.Accepted {
   fill: #e78ac3;
   stroke: #e78ac3;
+}
+
+svg .message.SyncRequest {
+  fill: #8da0cb;
+  stroke: #8da0cb;
+}
+
+svg .message.CatchUp {
+  fill: #8da0cb;
+  stroke: #8da0cb;
 }
 
 svg .message.request circle {

@@ -110,6 +110,28 @@ class Resolution extends MessageWithValue {
 	}
 }
 
+class SyncRequest extends Message {
+	//The paxos instance number used here is the latest one the node requesting sync knows about
+	constructor(paxosInstanceNumber, sourceNodeId, targetNodeId) {
+		super(paxosInstanceNumber, sourceNodeId, targetNodeId);
+	}
+}
+
+class CatchUp extends Message {
+	// _missingLogEntries;
+
+	//The paxos instance number used here is the latest one the node answering sync knows about
+	constructor(syncRequest, latestPaxosInstanceNumber, missingLogEntries) {
+		// invert message source and target
+		super(latestPaxosInstanceNumber, syncRequest.targetNodeId, syncRequest.sourceNodeId);
+		this._missingLogEntries = missingLogEntries;
+	}
+
+	get missingLogEntries() {
+		return this._missingLogEntries;
+	}
+}
+
 //TODO support NACK??
 
-export {ProposalId, Prepare, Promise, Accept, Accepted, Resolution};
+export {ProposalId, Prepare, Promise, Accept, Accepted, Resolution, SyncRequest, CatchUp};

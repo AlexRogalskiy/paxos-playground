@@ -1,4 +1,4 @@
-import {Accept, Accepted, Prepare, Promise} from "../paxos/Messages.js";
+import {Accept, Accepted, CatchUp, Prepare, Promise, SyncRequest} from "../paxos/Messages.js";
 import MessageHandler from "../paxos/MessageHandler.js";
 
 /**
@@ -42,6 +42,13 @@ class UiMessageHandler extends MessageHandler {
 	}
 
 	send(message) {
+		if (playback.isPaused() && message.constructor === SyncRequest) {
+			//Hack to ignore sync messages if simulation is paused
+			//TODO should fix when implementing master policy
+			console.log("ignoring sync message as simulation is stopped");
+			return;
+		}
+
 		const sendTime = this._model.time;
 		const recvTime = this._calculateRecvTime();
 		const dropTime = this._calculateDropTime(recvTime, sendTime);
@@ -80,9 +87,11 @@ class UiMessageHandler extends MessageHandler {
 		switch (message.constructor) {
 			case Prepare:
 			case Accept:
+			case SyncRequest:
 				return REQUEST;
 			case Promise :
 			case Accepted:
+			case CatchUp:
 				return REPLY;
 			default:
 				console.log(`Don't know how to handle message ${typeof message}`)

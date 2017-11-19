@@ -1,4 +1,4 @@
-import Node, {Role} from "../../main/js/paxos/Node";
+import Node, {allRoles} from "../../main/js/paxos/Node";
 import ProposerMock from "./mocks/ProposerMock";
 import Cluster from "../../main/js/paxos/Cluster";
 import LearnerMock from "./mocks/LearnerMock";
@@ -7,7 +7,6 @@ import Acceptor from "../../main/js/paxos/Acceptor";
 import ImmediateDeliveryMessageHandler from "./mocks/ImmediateDeliveryMessageHandler";
 
 const assert = require('assert');
-const allRoles = [Role.PROPOSER, Role.ACCEPTOR, Role.LEARNER];
 
 const _mockSetupAndStart = (node, cluster, messageHandler) => {
 	node.setup(cluster, messageHandler);

@@ -28,10 +28,10 @@ class Node {
 
 	setup(cluster, messageHandler) {
 		this._cluster = cluster;
-		this.messageHandler = messageHandler;
+		this._messageHandler = messageHandler;
 
 		//Initial paxos instance creation
-		this._paxosInstance = new PaxosInstance(this.messageHandler, 0, this.id, cluster);
+		this._paxosInstance = new PaxosInstance(this._messageHandler, 0, this.id, cluster);
 	}
 
 	start() {
@@ -95,16 +95,26 @@ class Node {
 		const resolution = this._paxosInstance.learner.handleAccepted(accepted);
 
 		if (resolution !== undefined && this._isFromCurrentPaxosInstance(resolution)) {
-			//store final value
-			this._log.push({
-				value: resolution.value,
-				paxosInstanceNumber: this.paxosInstanceNumber
-			});
-
-			//advance paxos instance
-			const newInstanceNumber = this._paxosInstance.paxosInstanceNumber + 1;
-			this._paxosInstance = new PaxosInstance(this.messageHandler, newInstanceNumber, this.id, this._cluster)
+			this.resolutionAchieved(resolution);
 		}
+	}
+
+	resolutionAchieved(resolution) {
+		//store final value
+		this._log.push({
+			value: resolution.value,
+			paxosInstanceNumber: this.paxosInstanceNumber
+		});
+
+		//advance paxos instance
+		const newInstanceNumber = this._paxosInstance.paxosInstanceNumber + 1;
+		this._paxosInstance = new PaxosInstance(this._messageHandler, newInstanceNumber, this.id, this._cluster)
+	}
+
+	doCatchup(latestInstanceNumber, missingLogEntries) {
+		missingLogEntries.forEach(entry => this.log.push(entry));
+
+		this._paxosInstance = new PaxosInstance(this._messageHandler, latestInstanceNumber, this.id, this._cluster)
 	}
 
 	isDown() {
@@ -129,6 +139,14 @@ class Node {
 
 	get paxosInstanceNumber() {
 		return this._paxosInstance.paxosInstanceNumber;
+	}
+
+	get peers() {
+		return this._cluster.nodes.filter(node => node.id !== this.id);
+	}
+	
+	get messageHandler() {
+		return this._messageHandler;
 	}
 }
 
