@@ -19,7 +19,10 @@ const ELECTION_TIMEOUT = 100000;
 	paxos.update = (model) => {
 		model.messageHandler.update(model);
 		model.messages = model.messageHandler.inFlightMessages;
-		model.servers.forEach(server => server.term = server.paxosInstanceNumber)
+		model.servers.forEach(server => {
+			server.updateTime(model.time);
+			server.term = server.paxosInstanceNumber
+		})
 	};
 
 	paxos.stop = (server) => {

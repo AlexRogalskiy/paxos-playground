@@ -35,9 +35,16 @@ const SyncMixin = (nodeClass) => class extends nodeClass {
 		super.doCatchup(catchUp.paxosInstanceNumber, catchUp.missingLogEntries);
 	}
 
+	updateTime(time) {
+		if (this.lastSyncTime === undefined || time - this.lastSyncTime >= SYNC_INTERVAL) {
+			this.lastSyncTime = time;
+			this._sendSyncRequest();
+		}
+	}
+
 	start() {
 		super.start();
-		this._sendSyncRequest(); // eager sync when coming back online
+		// this._sendSyncRequest(); // eager sync when coming back online
 	}
 
 	_randomElementFromArray(array) {
@@ -49,10 +56,9 @@ const SyncMixin = (nodeClass) => class extends nodeClass {
 class NodeWithSync extends SyncMixin(Node) {
 	constructor(...args) {
 		super(...args);
-		setInterval(this._sendSyncRequest.bind(this), SYNC_INTERVAL);
 	}
 }
 
-const SYNC_INTERVAL = 10000;
+const SYNC_INTERVAL = 100000;
 
 export default NodeWithSync
