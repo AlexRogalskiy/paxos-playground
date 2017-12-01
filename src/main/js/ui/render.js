@@ -228,6 +228,8 @@ $(function () {
 					.attr('id', 'message-' + i)
 					.attr('class', 'message ' + message.direction + ' ' + message.type)
 					.attr('title', message.type + ' ' + message.direction)//.tooltip({container: 'body'})
+					.attr('data-from', message.from)
+					.attr('data-to', message.to)
 					.append(SVG('circle'))
 					.append(SVG('path').attr('class', 'message-direction'));
 				if (message.direction == 'reply')
@@ -364,9 +366,9 @@ $(function () {
 			'</tbody></table>'
 		].join(''));
 
-		// No need to mark the leader - not implemented yet
-		// const leader = paxos.getLeader(model);
-		// if (leader !== null) $('#cell-' + leader.id + '-0').addClass('leader');
+		// TODO see if this breaks when disabling leader support
+		const leader = paxos.getLeader(model);
+		if (leader !== undefined) $('#cell-' + leader.id + '-0').addClass('leader');
 
 		if (scroll) cnt.scrollLeft(cnt.width());
 	};
@@ -572,7 +574,7 @@ $(function () {
 				.append(li('commitIndex', server.commitIndex))
 				.append(li('electionAlarm', util.relativeTime(server.electionAlarm, model.time)))
 			);
-		var isLeader = server.state === 'leader';
+		var isLeader = server.isMaster();
 		if (isLeader || server.state === "candidate") {
 			var tableHeader = $('<tr></tr>');
 			var peerTable = $('<table></table>');
@@ -608,7 +610,7 @@ $(function () {
 		var footer = $('.modal-footer', m);
 		footer.empty();
 		serverActions.filter(function (action) {
-			return server.state == "leader" || action[0] !== "request";
+			return server.isMaster() || action[0] !== "request";
 		}).forEach(function (action) {
 			footer.append(util.getButton(action[0])
 				.click(function () {

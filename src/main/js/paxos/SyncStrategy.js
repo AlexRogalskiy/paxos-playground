@@ -1,7 +1,6 @@
-import Node from "./Node.js";
 import {CatchUp, SyncRequest} from "./Messages.js";
 
-const SyncMixin = (nodeClass) => class extends nodeClass {
+export const SyncMixin = (nodeClass) => class extends nodeClass {
 	// mixins should either:
 	//   a) not define a constructor,
 	//   b) require a specificconstructor signature
@@ -53,12 +52,4 @@ const SyncMixin = (nodeClass) => class extends nodeClass {
 
 };
 
-class NodeWithSync extends SyncMixin(Node) {
-	constructor(...args) {
-		super(...args);
-	}
-}
-
-const SYNC_INTERVAL = 100000;
-
-export default NodeWithSync
+const SYNC_INTERVAL = 100000; //10 seconds

@@ -48,7 +48,7 @@ class Node {
 
 	// ---- PROPOSER ----
 
-	clientRequest(value) {
+	proposeUpdate(value) {
 		this.prepareValue(value);
 	}
 
@@ -99,12 +99,13 @@ class Node {
 		}
 	}
 
-	resolutionAchieved(resolution) {
-		//store final value
-		this._log.push({
-			value: resolution.value,
-			paxosInstanceNumber: this.paxosInstanceNumber
-		});
+	resolutionAchieved(resolution, persist = true) {
+		if (persist) {
+			this._log.push({
+				value: resolution.value,
+				paxosInstanceNumber: this.paxosInstanceNumber
+			});
+		}
 
 		//advance paxos instance
 		const newInstanceNumber = this._paxosInstance.paxosInstanceNumber + 1;
@@ -119,6 +120,12 @@ class Node {
 
 	isDown() {
 		return this._state === State.DOWN;
+	}
+
+	updateTime() {
+	}
+
+	isMaster() {
 	}
 
 	get roles() {
@@ -144,7 +151,7 @@ class Node {
 	get peers() {
 		return this._cluster.nodes.filter(node => node.id !== this.id);
 	}
-	
+
 	get messageHandler() {
 		return this._messageHandler;
 	}

@@ -21,7 +21,8 @@ const ELECTION_TIMEOUT = 100000;
 		model.messages = model.messageHandler.inFlightMessages;
 		model.servers.forEach(server => {
 			server.updateTime(model.time);
-			server.term = server.paxosInstanceNumber
+			server.term = server.paxosInstanceNumber;
+			server.state = server.isMaster() ? 'leader' : 'follower'
 		})
 	};
 
@@ -48,10 +49,17 @@ const ELECTION_TIMEOUT = 100000;
 
 	paxos.clientRequest = (server) => {
 		//TODO let the user specify value
-		server.clientRequest("v")
+		server.proposeUpdate("v")
 	};
 
 	// Leadership is not implemented yet. If no server is leader all are leaders
-	paxos.getLeader = (model) => model.servers[0]
+	paxos.getLeader = (model) => {
+		const leaders = model.servers.filter(server => server.isMaster());
+		if (leaders.length > 1) {
+			alert("We have more than one leader!");
+		}
+
+		return leaders[0];
+	}
 
 })();

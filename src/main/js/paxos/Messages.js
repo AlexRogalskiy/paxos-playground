@@ -108,6 +108,15 @@ class Resolution extends MessageWithValue {
 		// invert message source and target
 		super(accepted.paxosInstanceNumber, accepted.targetNodeId, accepted.sourceNodeId, accepted.proposalId, accepted.value);
 	}
+
+	// For some reason I need to override this getter. Otherwise it returns undefine
+	get value() {
+		return this._value;
+	}
+
+	set value(value) {
+		this._value = value
+	}
 }
 
 class SyncRequest extends Message {

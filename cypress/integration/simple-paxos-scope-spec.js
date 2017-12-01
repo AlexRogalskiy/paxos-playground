@@ -1,25 +1,6 @@
-let checkLog = function () {
-	cy.get('#cell-0-1').should('have.text', '0');
-	cy.get('#cell-1-1').should('have.text', '0');
-	cy.get('#cell-2-1').should('have.text', '0');
-	cy.get('#cell-3-1').should('have.text', '0');
-};
+import {checkLog, requestValue, stopNode} from "./PaxosTestHelper.js";
 
-let stopNode = function (nodeId) {
-	cy.get(`#server-${nodeId}`).trigger('contextmenu');
-	cy.get('a[name="stop"]').click();
-};
-
-let startNode = function (nodeId) {
-	cy.get(`#server-${nodeId}`).trigger('contextmenu');
-	cy.get('a[name="resume"]').click();
-};
-
-let requestValue = function (nodeId) {
-	cy.get(`#server-${nodeId}`).trigger('contextmenu');
-	cy.get('a[name="request"]').click();
-};
-describe('Paxos Scope', function () {
+describe('Simple Paxos Scope', function () {
 	describe('Initial state', function () {
 		before(function () {
 			cy.visit('/')
@@ -114,27 +95,6 @@ describe('Paxos Scope', function () {
 
 		it('should add only one value to the log', function () {
 			checkLog();
-		});
-	});
-
-	describe('Node is stuck after resume (no sync strategy)', function () {
-		before(function () {
-			cy.visit('/');
-
-			stopNode(3);
-
-			requestValue(0);
-		});
-
-		it('Node 3 stays out of date', function () {
-			cy.get('#cell-0-1').should('have.text', '0');
-			cy.get('#cell-1-1').should('have.text', '0');
-			cy.get('#cell-2-1').should('have.text', '0');
-
-			startNode(3);
-
-			//TODO not a great way of testing this either
-			cy.get('#cell-3-1').should('have.text', '');
 		});
 	});
 });

@@ -11,10 +11,11 @@
 /* global util */
 /* global speedSlider */
 'use strict';
-import {allRoles} from "../paxos/Node.js";
+import Node, {allRoles} from "../paxos/Node.js";
 import Cluster from "../paxos/Cluster.js";
 import UiMessageHandler from "./UiMessageHandler.js";
-import NodeWithSync from "../paxos/SyncStrategy.js";
+import {MasterMixin} from "../paxos/MasterStrategy.js";
+import {SyncMixin} from "../paxos/SyncStrategy.js";
 
 //this is just short-hand to call document.onReady(function)
 $(function () {
@@ -35,8 +36,18 @@ $(function () {
 	(function () {
 		const allNodes = [];
 		for (let i = 0; i < INITIAL_SERVER_NUMBER; i++) {
-			//TODO make this configurable
-			allNodes.push(new NodeWithSync(i, allRoles));
+			const urlParams = new URLSearchParams(window.location.search);
+			const config = urlParams.get('config');
+			let node;
+			if (config === 'master') {
+				node = new NodeWithMaster(window.state.current, i, allRoles)
+			} else if (config === 'sync') {
+				node = new NodeWithSync(i, allRoles)
+			} else {
+				node = new Node(i, allRoles)
+			}
+
+			allNodes.push(node);
 		}
 
 		const cluster = new Cluster(allNodes);
@@ -86,3 +97,16 @@ $(function () {
 	})();
 
 });
+
+//TODO can we simplify this?
+class NodeWithMaster extends MasterMixin(SyncMixin(Node)) {
+	constructor(...args) {
+		super(...args);
+	}
+}
+
+class NodeWithSync extends SyncMixin(Node) {
+	constructor(...args) {
+		super(...args);
+	}
+}
