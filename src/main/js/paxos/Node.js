@@ -20,11 +20,12 @@ class Node {
 	// _paxosInstance;
 	// _messageHandler;
 
-	constructor(id, roles) {
+	constructor(id, roles, enableOptimizations = false) {
 		this._id = id;
 		this._roles = roles;
 		this._state = State.DOWN;
 		this._log = [];
+		this._enableOptimizations = enableOptimizations;
 	}
 
 	setup(cluster, messageHandler) {
@@ -56,7 +57,7 @@ class Node {
 		const proposer = this._paxosInstance.proposer;
 		proposer.proposeUpdate(value);
 
-		if (!this.isMaster()) {
+		if (!this._enableOptimizations || !this.isMaster()) {
 			// If you're not the master, but you got here it means that there is no master,
 			// so you should kick-off the prepare
 			this.prepare();

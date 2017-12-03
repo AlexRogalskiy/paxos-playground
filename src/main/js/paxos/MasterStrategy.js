@@ -5,12 +5,14 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 	//   a) not define a constructor,
 	//   b) require a specific constructor signature
 	//   c) pass along all arguments.
-	constructor(model, ...args) {
-		super(...args);
+	constructor(id, roles, model, enableOptimizations) {
+		super(id, roles, enableOptimizations);
 		this._model = model;
 		this._masterId = undefined;
 		this._leaseStartTime = undefined;
 		this._proposedLeaseStartTime = undefined;
+		this._enableOptimizations = enableOptimizations;
+		this._renewLeaseWindow = enableOptimizations ? 160000 : 120000;
 	}
 
 	updateTime(time) {
@@ -25,7 +27,7 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 			this._leaseExpired();
 		}
 
-		if (this.isMaster() && time - this._leaseStartTime >= RENEW_LEASE_WINDOW && !this._electionsGoingOn()) {
+		if (this.isMaster() && time - this._leaseStartTime >= this._renewLeaseWindow && !this._electionsGoingOn()) {
 			// renew lease
 			console.log(`Node ${super.id} says: time to renew master lease`);
 			this.proposeUpdate(super.id, true);
@@ -52,7 +54,7 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 			if (this.isMaster()) {
 				super.proposeUpdate(new LogEntry(value, EntryType.APPLICATION_LEVEL))
 			} else {
-				console.log(`Ignoring client requests. Current leader is ${this._masterId}`)
+				console.log(`Node ${super.id} says: Ignoring client requests. Current leader is ${this._masterId}`)
 			}
 		}
 	}
@@ -93,9 +95,9 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 
 		super.resolutionAchieved(resolution, persist);
 
+		//TODO is it this easy to disable the optimizations?
 		// master optimizations
-		if (this._masterId !== undefined) {
-
+		if (this._enableOptimizations && this._masterId !== undefined) {
 			if (this.isMaster()) {
 				//call prepare on me but don't broadcast
 				const prepareMsgs = super.prepare(false);
@@ -171,4 +173,3 @@ const EntryType = {
 };
 
 const LEASE_WINDOW = 200000;
-const RENEW_LEASE_WINDOW = 160000;

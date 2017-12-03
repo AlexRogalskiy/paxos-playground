@@ -39,8 +39,10 @@ $(function () {
 			const urlParams = new URLSearchParams(window.location.search);
 			const config = urlParams.get('config');
 			let node;
-			if (config === 'master') {
-				node = new NodeWithMaster(window.state.current, i, allRoles)
+			if (config === 'master-optimized') {
+				node = new NodeWithMaster(i, allRoles, window.state.current, true)
+			} else if (config === 'master') {
+				node = new NodeWithMaster(i, allRoles, window.state.current, false)
 			} else if (config === 'sync') {
 				node = new NodeWithSync(i, allRoles)
 			} else {

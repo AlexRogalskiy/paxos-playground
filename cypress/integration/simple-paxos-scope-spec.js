@@ -48,21 +48,13 @@ describe('Simple Paxos Scope', function () {
 			requestValue(0)
 		});
 
-		it('see 3 prepare messages', function () {
+		it('should send messages and add the value to the log', function () {
 			cy.get('.message.Prepare').should('have.length', 3);
-		});
-
-		it('see 3 promises', function () {
 			cy.get('.message.Promise').should('have.length', 3);
-		});
+			cy.get('.message.Accepted').should('have.length', 3);
 
-		it('see 3 accept', function () {
-			cy.get('.message.Accept').should('have.length', 3);
-		});
+			//TODO other messages are hard to test
 
-		//TODO accepted messages are hard to test
-
-		it('should add value to the log', function () {
 			checkLog('0');
 		});
 	});

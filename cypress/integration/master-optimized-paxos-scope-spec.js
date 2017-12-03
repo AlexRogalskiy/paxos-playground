@@ -1,11 +1,11 @@
 import {stopNode} from "./PaxosTestHelper.js";
-import {checkLog, dropMessage} from "./PaxosTestHelper";
+import {dropMessage} from "./PaxosTestHelper";
 
 describe('Paxos Scope with Sync and Master', function () {
 
 	describe('Normal operation', function () {
 		before(function () {
-			cy.visit('/index.html?config=master');
+			cy.visit('/index.html?config=master-optimized');
 		});
 
 		it('Should elect a leader at the start of the simulation', function () {
@@ -22,21 +22,19 @@ describe('Paxos Scope with Sync and Master', function () {
 	});
 
 	//This tests assumes master optimization
-	describe("Master optimizations disabled", function () {
+	describe("Master optimizations", function () {
 		before(function () {
-			cy.visit('/index.html?config=master');
+			cy.visit('/index.html?config=master-optimized');
 		});
 
 		it('Should elect a leader at the start of the simulation', function () {
 			cy.get('.server.leader').should('have.length', 1);
 		});
 
-		it("Communication should NOT be optimized for requests from master", function () {
+		it("Communication should be optimized for requests from master", function () {
 			cy.get('.server.leader').first().trigger('contextmenu');
 			cy.get('a[name="request"]').click();
 
-			cy.get('a.message.Prepare').should('have.length', 3);
-			cy.get('a.message.Promise').should('have.length', 3);
 			cy.get('a.message.Accepted').should('have.length', 3);
 			cy.get('a.message.Accept').should('have.length', 3);
 			cy.get('a.message.Accepted').should('have.length', 9);
@@ -45,9 +43,10 @@ describe('Paxos Scope with Sync and Master', function () {
 		});
 	});
 
+	//This tests assumes master optimization
 	describe("Master can't communicate", function () {
 		before(function () {
-			cy.visit('/index.html?config=master');
+			cy.visit('/index.html?config=master-optimized');
 		});
 
 		it('Should elect a leader at the start of the simulation', function () {
@@ -56,18 +55,18 @@ describe('Paxos Scope with Sync and Master', function () {
 
 		it("Master should step down even if he has started an election", function () {
 			// Drop master renewal messages
-			cy.get('a.message.Prepare', {timeout: 30000}).then(() => {
+			cy.get('a.message.Accept', {timeout: 30000}).then(() => {
 				cy.get('#time-button').click();
 			});
 
 			//TODO I know this sucks but is they only thing working for me right now
-			cy.get('a.message.Prepare').first().click({force: true});
+			cy.get('a.message.Accept').first().click({force: true});
 			cy.get('button[value="drop"]').click();
 
-			cy.get('a.message.Prepare').first().click({force: true});
+			cy.get('a.message.Accept').first().click({force: true});
 			cy.get('button[value="drop"]').click();
 
-			cy.get('a.message.Prepare').first().click({force: true});
+			cy.get('a.message.Accept').first().click({force: true});
 			cy.get('button[value="drop"]').click();
 
 			cy.get('#time-button').click();
@@ -80,7 +79,7 @@ describe('Paxos Scope with Sync and Master', function () {
 
 	describe('Master failure', function () {
 		before(function () {
-			cy.visit('/index.html?config=master');
+			cy.visit('/index.html?config=master-optimized');
 		});
 
 		it('Should elect a leader at the start of the simulation', function () {
