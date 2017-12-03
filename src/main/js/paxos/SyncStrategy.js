@@ -22,7 +22,8 @@ export const SyncMixin = (nodeClass) => class extends nodeClass {
 		const currentInstanceNumber = super.paxosInstanceNumber;
 		if (syncRequest.paxosInstanceNumber >= currentInstanceNumber) return; //already up to date, ignore
 
-		const missingLogEntries = super.log.slice(syncRequest.paxosInstanceNumber, currentInstanceNumber);
+		const firstMissingIdx = super.log.findIndex(logEntry => logEntry.paxosInstanceNumber > syncRequest.paxosInstanceNumber);
+		const missingLogEntries = super.log.slice(firstMissingIdx);
 		const catchUp = new CatchUp(syncRequest, currentInstanceNumber, missingLogEntries);
 		super.messageHandler.send(catchUp);
 	}
