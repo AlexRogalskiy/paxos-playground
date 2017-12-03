@@ -1,8 +1,12 @@
-export const checkLog = function (expectedValue) {
-	cy.get('#cell-0-1').should('have.text', expectedValue);
-	cy.get('#cell-1-1').should('have.text', expectedValue);
-	cy.get('#cell-2-1').should('have.text', expectedValue);
-	cy.get('#cell-3-1').should('have.text', expectedValue);
+export const checkLog = function (expectedValues) {
+	let i = 1;
+	for (let expectedValue of expectedValues) {
+		cy.get(`#cell-0-${i}`).should('have.text', expectedValue);
+		cy.get(`#cell-1-${i}`).should('have.text', expectedValue);
+		cy.get(`#cell-2-${i}`).should('have.text', expectedValue);
+		cy.get(`#cell-3-${i}`).should('have.text', expectedValue);
+		i++;
+	}
 };
 
 export const stopNode = function (nodeId) {

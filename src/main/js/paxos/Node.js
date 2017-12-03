@@ -114,13 +114,12 @@ class Node {
 		}
 	}
 
-	resolutionAchieved(resolution, persist = true) {
-		if (persist) {
-			this._log.push({
-				value: resolution.value,
-				paxosInstanceNumber: this.paxosInstanceNumber
-			});
-		}
+	resolutionAchieved(resolution, entryType = EntryType.APPLICATION_LEVEL) {
+		this._log.push({
+			value: resolution.value,
+			paxosInstanceNumber: this.paxosInstanceNumber,
+			type: entryType
+		});
 
 		//advance paxos instance
 		const newInstanceNumber = this._paxosInstance.paxosInstanceNumber + 1;
@@ -213,6 +212,11 @@ export const allRoles = [Role.PROPOSER, Role.ACCEPTOR, Role.LEARNER];
 export const State = {
 	UP: Symbol("up"),
 	DOWN: Symbol("down"),
+};
+
+export const EntryType = {
+	APPLICATION_LEVEL: Symbol("application_level"),
+	ELECTION: Symbol("election")
 };
 
 export default Node;

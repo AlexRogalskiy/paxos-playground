@@ -1,7 +1,7 @@
 import {stopNode} from "./PaxosTestHelper.js";
-import {dropMessage} from "./PaxosTestHelper";
+import {checkLog, dropMessage} from "./PaxosTestHelper";
 
-describe('Paxos Scope with Sync and Master', function () {
+describe('Paxos Scope with Sync and Master - Optimized', function () {
 
 	describe('Normal operation', function () {
 		before(function () {
@@ -39,7 +39,7 @@ describe('Paxos Scope with Sync and Master', function () {
 			cy.get('a.message.Accept').should('have.length', 3);
 			cy.get('a.message.Accepted').should('have.length', 9);
 
-			checkLog('1')
+			checkLog(['0', '1'])
 		});
 	});
 

@@ -1,4 +1,5 @@
 import {Prepare, Promise, ProposalBuilder, ProposalId} from "./Messages.js";
+import {EntryType} from "./Node.js";
 
 export const MasterMixin = (nodeClass) => class extends nodeClass {
 	// mixins should either:
@@ -87,15 +88,12 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		// unwrap resolution
 		resolution.value = resolutionEntry.value;
 
-		let persist = true;
 		if (resolutionEntry.entryType === EntryType.ELECTION) {
 			this._updateLease(resolutionEntry.value);
-			persist = false;
 		}
 
-		super.resolutionAchieved(resolution, persist);
+		super.resolutionAchieved(resolution, resolutionEntry.entryType);
 
-		//TODO is it this easy to disable the optimizations?
 		// master optimizations
 		if (this._enableOptimizations && this._masterId !== undefined) {
 			if (this.isMaster()) {
@@ -166,10 +164,5 @@ class LogEntry {
 		return this._entryType;
 	}
 }
-
-const EntryType = {
-	APPLICATION_LEVEL: Symbol("application_level"),
-	ELECTION: Symbol("election")
-};
 
 const LEASE_WINDOW = 200000;
