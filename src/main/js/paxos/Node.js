@@ -2,6 +2,7 @@ import Proposer from "./Proposer.js";
 import Acceptor from "./Acceptor.js";
 import Learner from "./Learner.js";
 import {ProposalBuilder} from "./Messages.js";
+import {EntryType, LogEntry} from "./LogEntry.js";
 
 /**
  * Models a paxos node. Responsibilities:
@@ -50,12 +51,12 @@ class Node {
 
 	// ---- PROPOSER ----
 
-	proposeUpdate(value) {
+	proposeUpdate(value, entryType = EntryType.APPLICATION_LEVEL) {
 		if (this.isDown()) return;
 		if (!this.roles.includes(Role.PROPOSER)) return;
 
 		const proposer = this._paxosInstance.proposer;
-		proposer.proposeUpdate(value);
+		proposer.proposeUpdate(new LogEntry(value, entryType));
 
 		if (!this._enableOptimizations || !this.isMaster()) {
 			// If you're not the master, but you got here it means that there is no master,
@@ -114,11 +115,12 @@ class Node {
 		}
 	}
 
-	resolutionAchieved(resolution, entryType = EntryType.APPLICATION_LEVEL) {
+	resolutionAchieved(resolution) {
+		const logEntry = resolution.value;
 		this._log.push({
-			value: resolution.value,
+			value: logEntry.value,
 			paxosInstanceNumber: this.paxosInstanceNumber,
-			type: entryType
+			type: logEntry.entryType
 		});
 
 		//advance paxos instance
@@ -212,11 +214,6 @@ export const allRoles = [Role.PROPOSER, Role.ACCEPTOR, Role.LEARNER];
 export const State = {
 	UP: Symbol("up"),
 	DOWN: Symbol("down"),
-};
-
-export const EntryType = {
-	APPLICATION_LEVEL: Symbol("application_level"),
-	ELECTION: Symbol("election")
 };
 
 export default Node;

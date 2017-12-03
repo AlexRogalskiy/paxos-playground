@@ -1,5 +1,6 @@
 import {Prepare, Promise, ProposalBuilder, ProposalId} from "./Messages.js";
-import {EntryType} from "./Node.js";
+import {EntryType} from "./LogEntry.js";
+
 
 export const MasterMixin = (nodeClass) => class extends nodeClass {
 	// mixins should either:
@@ -53,7 +54,7 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 			}
 		} else {
 			if (this.isMaster()) {
-				super.proposeUpdate(new LogEntry(value, EntryType.APPLICATION_LEVEL))
+				super.proposeUpdate(value, EntryType.ELECTION)
 			} else {
 				console.log(`Node ${super.id} says: Ignoring client requests. Current leader is ${this._masterId}`)
 			}
@@ -85,14 +86,12 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 
 	resolutionAchieved(resolution) {
 		const resolutionEntry = resolution.value;
-		// unwrap resolution
-		resolution.value = resolutionEntry.value;
 
 		if (resolutionEntry.entryType === EntryType.ELECTION) {
 			this._updateLease(resolutionEntry.value);
 		}
 
-		super.resolutionAchieved(resolution, resolutionEntry.entryType);
+		super.resolutionAchieved(resolution);
 
 		// master optimizations
 		if (this._enableOptimizations && this._masterId !== undefined) {
@@ -121,7 +120,7 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		// resetting the time here is a sure way of knowing that it'll time out before any other peer.
 		this._proposedLeaseStartTime = this._model.time;
 		// proposing myself as master
-		super.proposeUpdate(new LogEntry(super.id, EntryType.ELECTION));
+		super.proposeUpdate(super.id, EntryType.ELECTION);
 	}
 
 	_updateLease(leaderNodeId) {
@@ -146,23 +145,5 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 	}
 
 };
-
-class LogEntry {
-	// _value;
-	// _entryType;
-
-	constructor(value, entryType = EntryType.APPLICATION_LEVEL) {
-		this._value = value;
-		this._entryType = entryType;
-	}
-
-	get value() {
-		return this._value;
-	}
-
-	get entryType() {
-		return this._entryType;
-	}
-}
 
 const LEASE_WINDOW = 200000;
