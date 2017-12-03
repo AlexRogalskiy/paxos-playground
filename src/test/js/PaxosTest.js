@@ -36,7 +36,7 @@ describe('Paxos in a 3 node cluster', () => {
 
 		it('Should agree on a given value', function () {
 			const value = "some value";
-			this.proposer.prepareValue(value);
+			this.proposer.proposeUpdate(value);
 
 			this.cluster.learners.forEach(node => _checkLogValues(node, value))
 		});
@@ -45,7 +45,7 @@ describe('Paxos in a 3 node cluster', () => {
 			this.node2.stop();
 
 			const value = "some value";
-			this.proposer.prepareValue(value);
+			this.proposer.proposeUpdate(value);
 
 
 			_checkLogValues(this.cluster.learners[0], value);
@@ -58,7 +58,7 @@ describe('Paxos in a 3 node cluster', () => {
 			this.node2.stop();
 
 			const value = "some value";
-			this.proposer.prepareValue(value);
+			this.proposer.proposeUpdate(value);
 
 			this.cluster.learners.forEach(node => _checkLogValues(node))
 		})
@@ -67,7 +67,7 @@ describe('Paxos in a 3 node cluster', () => {
 	describe('Multi-paxos', function () {
 		it('Should advance paxos instance number after resolution', function () {
 			const value1 = "value1";
-			this.proposer.prepareValue(value1);
+			this.proposer.proposeUpdate(value1);
 
 			this.cluster.learners.forEach(node => assert.equal(1, node._paxosInstance.paxosInstanceNumber))
 		});
@@ -75,8 +75,10 @@ describe('Paxos in a 3 node cluster', () => {
 		it('Should agree on 2 values', function () {
 			const value1 = "value1";
 			const value2 = "value2";
-			this.proposer.prepareValue(value1);
-			this.proposer.prepareValue(value2);
+
+			this.proposer.proposeUpdate(value1);
+
+			this.proposer.proposeUpdate(value2);
 
 			this.cluster.learners.forEach(node => _checkLogValues(node, value1, value2))
 		});

@@ -23,7 +23,7 @@ class Acceptor {
 		this._cluster = cluster;
 	}
 
-	handlePrepare(prepare) {
+	handlePrepare(prepare, broadcast = true) {
 		const proposalId = prepare.proposalId;
 
 		let promise;
@@ -31,7 +31,9 @@ class Acceptor {
 			// accept prepare
 			promise = new Promise(this._paxosInstanceNumber, prepare, this._acceptedValue, this._acceptedProposalId);
 			this._promisedProposalId = proposalId;
-			this.messageHandler.send(promise);
+			if (broadcast) {
+				this.messageHandler.send(promise);
+			}
 		} else {
 			// reject prepare
 			console.log(`I'm not preparing ${prepare}, already promised to ${this._promisedProposalId} and accepted ${this._acceptedProposalId}`)

@@ -7,7 +7,7 @@ const ResolutionMixin = (nodeClass) => class extends nodeClass {
 	//   c) pass along all arguments.
 
 	prepareValue(value) {
-		super.prepareValue(value);
+		super.prepare(value);
 
 		this.prepareRetryTaskId = setInterval(super.proposer.broadcastPrepare(), 10000);
 	}

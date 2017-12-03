@@ -1,27 +1,45 @@
+import {Prepare, Promise, ProposalBuilder, ProposalId} from "./Messages.js";
+
 export const MasterMixin = (nodeClass) => class extends nodeClass {
 	// mixins should either:
 	//   a) not define a constructor,
-	//   b) require a specificconstructor signature
+	//   b) require a specific constructor signature
 	//   c) pass along all arguments.
 	constructor(model, ...args) {
 		super(...args);
 		this._model = model;
-		this._masterId = undefined //TODO initial value for leader?
+		this._masterId = undefined;
+		this._leaseStartTime = undefined;
+		this._proposedLeaseStartTime = undefined;
 	}
 
 	updateTime(time) {
-		if (this._lastLeaseStartTime === undefined || time - this._lastLeaseStartTime >= LEASE_WINDOW) {
-			console.log("");
+		if (this._electionsGoingOn() && this._hasLeaseExpired(time)) {
+			if (this._masterId !== undefined) {
+				console.log(`Node ${super.id} says: My lease expired while waiting for confirmation, I'm no longer the master`);
+				//Reset master but don't start election because there's one in progress already
+				this._masterId = undefined;
+			}
+		} else if (!this._electionsGoingOn() && this._hasLeaseExpired(time)) {
+			console.log(`Node ${super.id} says: The lease has expired, we don't have a master anymore`);
 			this._leaseExpired();
 		}
 
-		if (this.isMaster() && time - this._lastLeaseStartTime >= RENEW_LEASE_WINDOW) {
+		if (this.isMaster() && time - this._leaseStartTime >= RENEW_LEASE_WINDOW && !this._electionsGoingOn()) {
 			// renew lease
-			console.log("time to renew master lease");
+			console.log(`Node ${super.id} says: time to renew master lease`);
 			this.proposeUpdate(super.id, true);
 		}
 
 		super.updateTime(time)
+	}
+
+	_electionsGoingOn() {
+		return this._proposedLeaseStartTime !== undefined;
+	}
+
+	_hasLeaseExpired(time) {
+		return ( this._leaseStartTime === undefined || time - this._leaseStartTime >= LEASE_WINDOW );
 	}
 
 	proposeUpdate(value, isElectionValue = false) {
@@ -75,12 +93,33 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 
 		super.resolutionAchieved(resolution, persist);
 
-		//TODO other optimizations to cut down the number of messages
+		// master optimizations
+		if (this._masterId !== undefined) {
+
+			if (this.isMaster()) {
+				//call prepare on me but don't broadcast
+				const prepareMsgs = super.prepare(false);
+
+				// synthesize Promise messages from other nodes
+				prepareMsgs.forEach(prepare => {
+					if (ProposalId.compare(prepare.proposalId, ProposalBuilder.buildMasterProposalId(super.id)) !== 0) {
+						throw Error('The prepared proposal does not match with the master proposal id')
+					}
+					const promise = new Promise(super.paxosInstanceNumber, prepare, undefined, undefined);
+					super.handlePromise(promise, false)
+				});
+			} else {
+				// synthesize Prepare from master node
+				const proposalId = ProposalBuilder.buildMasterProposalId(this._masterId);
+				const prepare = new Prepare(super.paxosInstanceNumber, this._masterId, super.id, proposalId);
+				super.handlePrepare(prepare, false)
+			}
+		}
 	}
 
 	_startElection() {
 		// resetting the time here is a sure way of knowing that it'll time out before any other peer.
-		this._lastLeaseStartTime = this._model.time;
+		this._proposedLeaseStartTime = this._model.time;
 		// proposing myself as master
 		super.proposeUpdate(new LogEntry(super.id, EntryType.ELECTION));
 	}
@@ -92,8 +131,13 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 
 		if (!this.isMaster()) {
 			// If I'm not the master reset timer
-			this._lastLeaseStartTime = this._model.time;
+			this._leaseStartTime = this._model.time;
+		} else {
+			// make the proposed lease start time effective
+			this._leaseStartTime = this._proposedLeaseStartTime;
 		}
+
+		this._proposedLeaseStartTime = undefined;
 	}
 
 	_leaseExpired() {
@@ -126,5 +170,5 @@ const EntryType = {
 	ELECTION: Symbol("election")
 };
 
-const LEASE_WINDOW = 100000;
-const RENEW_LEASE_WINDOW = 80000;
+const LEASE_WINDOW = 200000;
+const RENEW_LEASE_WINDOW = 160000;

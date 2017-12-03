@@ -98,6 +98,10 @@ class UiMessageHandler extends MessageHandler {
 		}
 	}
 
+	dropMessage(message) {
+		this._inFlightMessages = this.inFlightMessages.filter(m => m !== message);
+	}
+
 	get inFlightMessages() {
 		return this._inFlightMessages;
 	}

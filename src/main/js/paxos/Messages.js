@@ -1,11 +1,9 @@
-let proposalNumber = 0; //Global proposal number. Maybe this is cheating a little bit...
-
 class ProposalId {
 	// _proposalNumber;
 	// _nodeId;
 
-	constructor(nodeId) {
-		this._proposalNumber = proposalNumber++;
+	constructor(proposalNumber, nodeId) {
+		this._proposalNumber = proposalNumber;
 		this._nodeId = nodeId;
 	}
 
@@ -14,6 +12,22 @@ class ProposalId {
 		if (b === undefined) return 1;
 		const result = a._proposalNumber - b._proposalNumber;
 		return result === 0 ? a._nodeId - b._nodeId : result;
+	}
+}
+
+class ProposalBuilder {
+	constructor() {
+		// Master proposal is 0, everybody else starts on 1
+		// So that if we loose the master the next regular proposal will succeed
+		this.proposalNumber = 1;
+	}
+
+	buildProposal(nodeId) {
+		return new ProposalId(this.proposalNumber++, nodeId);
+	}
+
+	static buildMasterProposalId(nodeId) {
+		return new ProposalId(0, nodeId);
 	}
 }
 
@@ -143,4 +157,4 @@ class CatchUp extends Message {
 
 //TODO support NACK??
 
-export {ProposalId, Prepare, Promise, Accept, Accepted, Resolution, SyncRequest, CatchUp};
+export {ProposalId, Prepare, Promise, Accept, Accepted, Resolution, SyncRequest, CatchUp, ProposalBuilder};

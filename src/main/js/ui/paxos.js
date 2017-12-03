@@ -45,6 +45,7 @@ const ELECTION_TIMEOUT = 100000;
 
 	paxos.drop = (model, message) => {
 		model.messages = model.messages.filter(m => m !== message);
+		model.messageHandler.dropMessage(message);
 	};
 
 	paxos.clientRequest = (server) => {

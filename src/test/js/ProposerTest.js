@@ -1,6 +1,6 @@
 import Node, {allRoles} from "../../main/js/paxos/Node";
 import Cluster from "../../main/js/paxos/Cluster";
-import {Promise, ProposalId} from "../../main/js/paxos/Messages";
+import {Promise, ProposalBuilder, ProposalId} from "../../main/js/paxos/Messages";
 import Proposer from "../../main/js/paxos/Proposer";
 import AcceptorMock from "./mocks/AcceptorMock";
 import ImmediateDeliveryMessageHandler from "./mocks/ImmediateDeliveryMessageHandler";
@@ -32,12 +32,12 @@ describe('Proposer', function () {
 			const messageHandler = new ImmediateDeliveryMessageHandler(this.cluster);
 			allNodes.forEach((node) => _mockSetupAndStart(node, this.cluster, messageHandler));
 
-			this.proposer = new Proposer(messageHandler, 0, this.cluster, 0);
+			this.proposer = new Proposer(messageHandler, 0, this.cluster, 0, new ProposalBuilder());
 		});
 
-		describe('prepareValue()', function () {
+		describe('prepare()', function () {
 			beforeEach(function () {
-				this.proposer.prepareValue("some value");
+				this.proposer.prepare("some value");
 			});
 
 			it(`each acceptor should have received 1 message`, function () {
@@ -66,9 +66,10 @@ describe('Proposer', function () {
 				this.previousProposalId1 = new ProposalId(0);
 				this.previousProposalId2 = new ProposalId(0);
 
-				//need to call prepareValue first to populate currentProposal
-				this.proposerValue = "some value";
-				this.proposer.prepareValue(this.proposerValue);
+				//need to call prepare first to populate currentProposal
+				this._proposedValue = "some value";
+				this.proposer.proposeUpdate(this._proposedValue);
+				this.proposer.prepare();
 			});
 
 			it(`promise should be registered on proposer`, function () {
@@ -111,7 +112,7 @@ describe('Proposer', function () {
 				this.cluster.acceptors.forEach(node => {
 					const mockAcceptor = node._paxosInstance.acceptor;
 					assert.equal(1, mockAcceptor.receivedAccepts.length);
-					assert.equal(this.proposerValue, mockAcceptor.receivedAccepts[0].value);
+					assert.equal(this._proposedValue, mockAcceptor.receivedAccepts[0].value);
 				});
 			});
 

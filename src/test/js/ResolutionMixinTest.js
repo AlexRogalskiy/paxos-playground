@@ -29,9 +29,9 @@ describe('Proposer', function () {
 			this.proposer = allNodes[0];
 		});
 
-		describe('prepareValue()', function () {
+		describe('prepare()', function () {
 			beforeEach(function () {
-				this.proposer.prepareValue("some value");
+				this.proposer.prepare("some value");
 			});
 
 			it(`each acceptor should have received 1 message`, function () {

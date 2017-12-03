@@ -1,8 +1,8 @@
-export const checkLog = function () {
-	cy.get('#cell-0-1').should('have.text', '0');
-	cy.get('#cell-1-1').should('have.text', '0');
-	cy.get('#cell-2-1').should('have.text', '0');
-	cy.get('#cell-3-1').should('have.text', '0');
+export const checkLog = function (expectedValue) {
+	cy.get('#cell-0-1').should('have.text', expectedValue);
+	cy.get('#cell-1-1').should('have.text', expectedValue);
+	cy.get('#cell-2-1').should('have.text', expectedValue);
+	cy.get('#cell-3-1').should('have.text', expectedValue);
 };
 
 export const stopNode = function (nodeId) {

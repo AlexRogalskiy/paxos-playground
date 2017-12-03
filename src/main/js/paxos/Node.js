@@ -1,6 +1,7 @@
 import Proposer from "./Proposer.js";
 import Acceptor from "./Acceptor.js";
 import Learner from "./Learner.js";
+import {ProposalBuilder} from "./Messages.js";
 
 /**
  * Models a paxos node. Responsibilities:
@@ -49,32 +50,45 @@ class Node {
 	// ---- PROPOSER ----
 
 	proposeUpdate(value) {
-		this.prepareValue(value);
-	}
-
-	prepareValue(value) {
 		if (this.isDown()) return;
 		if (!this.roles.includes(Role.PROPOSER)) return;
 
-		this._paxosInstance.proposer.prepareValue(value)
+		const proposer = this._paxosInstance.proposer;
+		proposer.proposeUpdate(value);
+
+		if (!this.isMaster()) {
+			// If you're not the master, but you got here it means that there is no master,
+			// so you should kick-off the prepare
+			this.prepare();
+		} else {
+			// If you're the master jump directly to the 2nd phase
+			proposer.broadcastAccept();
+		}
 	}
 
-	handlePromise(promise) {
+	prepare(broadcast = true) {
+		if (this.isDown()) return;
+		if (!this.roles.includes(Role.PROPOSER)) return;
+
+		return this._paxosInstance.proposer.prepare(broadcast)
+	}
+
+	handlePromise(promise, broadcast = true) {
 		if (this.isDown()) return;
 		if (!this.roles.includes(Role.PROPOSER)) return;
 		if (!this._isFromCurrentPaxosInstance(promise)) return;
 
-		this._paxosInstance.proposer.handlePromise(promise);
+		this._paxosInstance.proposer.handlePromise(promise, broadcast);
 	}
 
 	// ---- ACCEPTOR ----
 
-	handlePrepare(prepare) {
+	handlePrepare(prepare, broadcast = true) {
 		if (this.isDown()) return;
 		if (!this.roles.includes(Role.ACCEPTOR)) return;
 		if (!this._isFromCurrentPaxosInstance(prepare)) return;
 
-		this._paxosInstance.acceptor.handlePrepare(prepare);
+		this._paxosInstance.acceptor.handlePrepare(prepare, broadcast);
 	}
 
 	handleAccept(accept) {
@@ -164,7 +178,7 @@ class PaxosInstance {
 
 	constructor(messageHandler, paxosInstanceNumber, id, cluster) {
 		this._paxosInstanceNumber = paxosInstanceNumber;
-		this._proposer = new Proposer(messageHandler, this._paxosInstanceNumber, cluster, id);
+		this._proposer = new Proposer(messageHandler, this._paxosInstanceNumber, cluster, id, new ProposalBuilder());
 		this._acceptor = new Acceptor(messageHandler, this._paxosInstanceNumber, cluster);
 		this._learner = new Learner(messageHandler, this._paxosInstanceNumber, cluster);
 	}
