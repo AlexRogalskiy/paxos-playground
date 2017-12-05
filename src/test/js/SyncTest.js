@@ -26,6 +26,19 @@ describe('Sync strategy test', () => {
 			assert.equal(catchUpMessage.paxosInstanceNumber, 20);
 		});
 
+		it('Should sync cluster', function () {
+			const cluster = "newCluster";
+			const node = new MockWithSync([], 20, cluster);
+
+			const syncRequest = new SyncRequest(3, 0, 0);
+			node.handleSyncRequest(syncRequest);
+
+			const messages = node.messageHandler.messages;
+			assert.equal(messages.length, 1);
+			const catchUpMessage = messages[0];
+			assert.equal(catchUpMessage.cluster, cluster);
+		});
+
 		it('Should ignore if up to date', function () {
 			const node = new MockWithSync([], 20);
 
@@ -50,11 +63,12 @@ describe('Sync strategy test', () => {
 });
 
 class MockNode {
-	constructor(log, paxosInstanceNumber) {
+	constructor(log, paxosInstanceNumber, cluster) {
 		this._log = log;
 		this._paxosInstanceNumber = paxosInstanceNumber;
 		this._messageHandler = new DoNothingMessageHandler();
 		this._isDown = false;
+		this._cluster = cluster;
 	}
 
 	doCatchUp() {
@@ -64,7 +78,6 @@ class MockNode {
 	isDown() {
 		return this._isDown;
 	}
-
 
 	setIsDown(value) {
 		this._isDown = value;
@@ -84,6 +97,10 @@ class MockNode {
 
 	get messageHandler() {
 		return this._messageHandler;
+	}
+	
+	get cluster() {
+		return this._cluster;
 	}
 }
 

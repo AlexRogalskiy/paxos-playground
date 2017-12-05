@@ -22,6 +22,7 @@ class UiMessageHandler extends MessageHandler {
 	 */
 	update(model) {
 		this._model = model;
+		this.cluster = this._model.cluster; // Update cluster in case there was a change
 
 		// Deliver messages due for delivery
 		this._deliverMsgsDueForDelivery(model);

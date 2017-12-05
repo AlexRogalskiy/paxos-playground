@@ -128,8 +128,9 @@ class Node {
 		this._paxosInstance = new PaxosInstance(this._messageHandler, newInstanceNumber, this.id, this._cluster)
 	}
 
-	doCatchup(latestInstanceNumber, missingLogEntries) {
+	doCatchup(latestInstanceNumber, missingLogEntries, cluster) {
 		missingLogEntries.forEach(entry => this.log.push(entry));
+		this._cluster = cluster;
 
 		this._paxosInstance = new PaxosInstance(this._messageHandler, latestInstanceNumber, this.id, this._cluster)
 	}
@@ -170,6 +171,14 @@ class Node {
 
 	get messageHandler() {
 		return this._messageHandler;
+	}
+
+	get cluster() {
+		return this._cluster;
+	}
+
+	set cluster(newCluster) {
+		this._cluster = newCluster;
 	}
 }
 

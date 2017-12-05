@@ -22,9 +22,9 @@ export const SyncMixin = (nodeClass) => class extends nodeClass {
 		const currentInstanceNumber = super.paxosInstanceNumber;
 		if (syncRequest.paxosInstanceNumber >= currentInstanceNumber) return; //already up to date, ignore
 
-		const firstMissingIdx = super.log.findIndex(logEntry => logEntry.paxosInstanceNumber > syncRequest.paxosInstanceNumber);
+		const firstMissingIdx = super.log.findIndex(logEntry => logEntry.paxosInstanceNumber >= syncRequest.paxosInstanceNumber);
 		const missingLogEntries = super.log.slice(firstMissingIdx);
-		const catchUp = new CatchUp(syncRequest, currentInstanceNumber, missingLogEntries);
+		const catchUp = new CatchUp(syncRequest, currentInstanceNumber, missingLogEntries, super.cluster);
 		super.messageHandler.send(catchUp);
 	}
 
@@ -32,7 +32,7 @@ export const SyncMixin = (nodeClass) => class extends nodeClass {
 		if (this.isDown()) return;
 		if (catchUp.paxosInstanceNumber <= super.paxosInstanceNumber) return;
 
-		super.doCatchup(catchUp.paxosInstanceNumber, catchUp.missingLogEntries);
+		super.doCatchup(catchUp.paxosInstanceNumber, catchUp.missingLogEntries, catchUp.cluster);
 	}
 
 	updateTime(time) {

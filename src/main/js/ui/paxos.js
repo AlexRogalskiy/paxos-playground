@@ -49,7 +49,6 @@ const ELECTION_TIMEOUT = 100000;
 	};
 
 	paxos.clientRequest = (server) => {
-		//TODO let the user specify value
 		server.proposeUpdate("v")
 	};
 
@@ -61,6 +60,33 @@ const ELECTION_TIMEOUT = 100000;
 		}
 
 		return leaders[0];
-	}
+	};
+
+	//TODO make sure this is hidden if you're not using ConfigStrategy
+	paxos.addServer = (model) => {
+		const addServerUpdateUi = (cluster, newNode) => {
+			if (model.servers.includes(newNode)) {
+				// This node was already added to the model
+				return;
+			}
+
+			//Init new node
+			newNode.setup(cluster, model.messageHandler);
+			newNode.start();
+
+			model.cluster = cluster;
+			model.servers.forEach(graphics.realign(model.servers.length + 1));
+			model.servers.push(newNode);
+			model.deadServersWalking[newNode.id] = true;
+			graphics.get_creator(model.servers.length)(newNode, model.servers.length - 1);
+		};
+
+		//TODO only works with leader for now
+		const leader = paxos.getLeader(model);
+		if (leader !== undefined) {
+			const node = util.createNode(model);
+			leader.addNode(node, addServerUpdateUi);
+		}
+	};
 
 })();

@@ -31,11 +31,15 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 
 		if (this.isMaster() && time - this._leaseStartTime >= this._renewLeaseWindow && !this._electionsGoingOn()) {
 			// renew lease
-			console.log(`Node ${super.id} says: time to renew master lease`);
-			this.proposeUpdate(super.id, true);
+			this.renewLease();
 		}
 
 		super.updateTime(time)
+	}
+
+	renewLease() {
+		console.log(`Node ${super.id} says: time to renew master lease`);
+		this.proposeUpdate(super.id, EntryType.ELECTION);
 	}
 
 	_electionsGoingOn() {
@@ -46,15 +50,15 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		return ( this._leaseStartTime === undefined || time - this._leaseStartTime >= LEASE_WINDOW );
 	}
 
-	proposeUpdate(value, isElectionValue = false) {
-		if (isElectionValue) {
+	proposeUpdate(value, entryType = EntryType.APPLICATION_LEVEL) {
+		if (entryType === EntryType.ELECTION) {
 			// If I don't know who the master is or trying to update lease
 			if (this._masterId === undefined || this.isMaster()) {
 				this._startElection();
 			}
 		} else {
 			if (this.isMaster()) {
-				super.proposeUpdate(value, EntryType.ELECTION)
+				super.proposeUpdate(value, entryType)
 			} else {
 				console.log(`Node ${super.id} says: Ignoring client requests. Current leader is ${this._masterId}`)
 			}

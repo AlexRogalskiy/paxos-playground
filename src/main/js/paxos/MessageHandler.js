@@ -49,6 +49,10 @@ class MessageHandler {
 			}
 		}
 	}
+
+	set cluster(value) {
+		this._cluster = value;
+	}
 }
 
 

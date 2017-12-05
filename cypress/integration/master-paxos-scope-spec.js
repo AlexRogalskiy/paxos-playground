@@ -25,9 +25,6 @@ describe('Paxos Scope with Sync and Master', function () {
 	describe("Master optimizations disabled", function () {
 		before(function () {
 			cy.visit('/index.html?config=master');
-		});
-
-		it('Should elect a leader at the start of the simulation', function () {
 			cy.get('.server.leader').should('have.length', 1);
 		});
 
@@ -48,9 +45,6 @@ describe('Paxos Scope with Sync and Master', function () {
 	describe("Master can't communicate", function () {
 		before(function () {
 			cy.visit('/index.html?config=master');
-		});
-
-		it('Should elect a leader at the start of the simulation', function () {
 			cy.get('.server.leader').should('have.length', 1);
 		});
 
@@ -81,9 +75,6 @@ describe('Paxos Scope with Sync and Master', function () {
 	describe('Master failure', function () {
 		before(function () {
 			cy.visit('/index.html?config=master');
-		});
-
-		it('Should elect a leader at the start of the simulation', function () {
 			cy.get('.server.leader').should('have.length', 1);
 		});
 
