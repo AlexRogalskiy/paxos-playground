@@ -56,7 +56,7 @@ const ELECTION_TIMEOUT = 100000;
 	paxos.getLeader = (model) => {
 		const leaders = model.servers.filter(server => server.isMaster());
 		if (leaders.length > 1) {
-			alert("We have more than one leader!");
+			console.warn("We have more than one leader!");
 		}
 
 		return leaders[0];
@@ -88,5 +88,26 @@ const ELECTION_TIMEOUT = 100000;
 			leader.addNode(node, addServerUpdateUi);
 		}
 	};
+
+	paxos.removeServer = (nodeToRemove, model) => {
+		const removeServerUpdateUi = (cluster, nodeToRemove) => {
+			if (!model.servers.includes(nodeToRemove)) {
+				// This node was already removed
+				return;
+			}
+
+			model.cluster = cluster;
+			model.servers = model.servers.filter(n => n !== nodeToRemove);
+
+			$('#server-' + nodeToRemove.id).remove();
+			model.servers.forEach(graphics.realign(model.servers.length));
+		};
+
+		//TODO only works with leader for now
+		const leader = paxos.getLeader(model);
+		if (leader !== undefined) {
+			leader.removeNode(nodeToRemove, removeServerUpdateUi);
+		}
+	}
 
 })();

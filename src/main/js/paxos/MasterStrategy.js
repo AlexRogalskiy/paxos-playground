@@ -26,7 +26,7 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 			}
 		} else if (!this._electionsGoingOn() && this._hasLeaseExpired(time)) {
 			console.log(`Node ${super.id} says: The lease has expired, we don't have a master anymore`);
-			this._leaseExpired();
+			this.leaseExpired();
 		}
 
 		if (this.isMaster() && time - this._leaseStartTime >= this._renewLeaseWindow && !this._electionsGoingOn()) {
@@ -143,9 +143,13 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		this._proposedLeaseStartTime = undefined;
 	}
 
-	_leaseExpired() {
+	leaseExpired() {
 		this._masterId = undefined;
 		this._startElection();
+	}
+
+	get masterId() {
+		return this._masterId;
 	}
 
 };

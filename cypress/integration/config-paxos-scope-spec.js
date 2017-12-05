@@ -36,4 +36,35 @@ describe('Paxos Scope with Sync and Master - Optimized and Config strategy', fun
 		});
 	});
 
+	describe('Remove a node', function () {
+		before(function () {
+			cy.visit('/index.html?config=master-optimized-config');
+			cy.get('.server.leader').should('have.length', 1);
+		});
+
+		it('Should have only 3 nodes after removal', function () {
+			cy.get(`#server-0`).trigger('contextmenu');
+			cy.get('a[name="remove"]').click();
+
+			cy.get('.server').should('have.length', 3);
+		});
+	});
+
+	describe('Remove master', function () {
+		before(function () {
+			cy.visit('/index.html?config=master-optimized-config');
+			cy.get('.server.leader').should('have.length', 1);
+		});
+
+		it('Should trigger election after master removal', function () {
+			cy.get('.server.leader').trigger('contextmenu');
+			cy.get('a[name="remove"]').click();
+
+			cy.get('a.message.Prepare').should('have.length.above', 2);
+		});
+	});
+
+	// TODO Test call remove and add multiple times when simulation is stopped
+	// TODO test 2 nodes, 1 node, 0 nodes
+
 });

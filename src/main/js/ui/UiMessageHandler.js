@@ -24,11 +24,25 @@ class UiMessageHandler extends MessageHandler {
 		this._model = model;
 		this.cluster = this._model.cluster; // Update cluster in case there was a change
 
-		// Deliver messages due for delivery
-		this._deliverMsgsDueForDelivery(model);
+		// Remove messages that were sent or are to be received by dead servers
+		this._removeMessagesToRemovedServers();
+		this._removeMessagesFromRemovedServers();
 
 		// Remove messages that need to be dropped
 		this._removeDroppedMessages(model);
+
+		// Deliver messages due for delivery
+		this._deliverMsgsDueForDelivery(model);
+	}
+
+	_removeMessagesToRemovedServers() {
+		this._inFlightMessages = this._inFlightMessages
+			.filter(msg => this.cluster.nodes.some(n => n.id === msg.targetNodeId));
+	}
+
+	_removeMessagesFromRemovedServers() {
+		this._inFlightMessages = this._inFlightMessages
+			.filter(msg => this.cluster.nodes.some(n => n.id === msg.sourceNodeId));
 	}
 
 	_removeDroppedMessages(model) {

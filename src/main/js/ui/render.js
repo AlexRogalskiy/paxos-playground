@@ -205,7 +205,7 @@ $(function () {
 									.text(actionName)
 									.click(function () {
 										state.fork();
-										action[1](server);
+										action[1](server, state.current);
 										state.save();
 										render.update();
 										closemenu();
@@ -616,7 +616,7 @@ $(function () {
 				.click(function () {
 					state.fork();
 					// action[1] == callback
-					action[1](server);
+					action[1](server, state.current);
 					state.save();
 					render.update();
 					m.modal('hide');

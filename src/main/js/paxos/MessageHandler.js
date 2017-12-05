@@ -18,7 +18,7 @@ class MessageHandler {
 		if (index > -1) {
 			this._inFlightMessages.splice(index, 1);
 
-			const targetNode = this._cluster.nodes[message.targetNodeId];
+			const targetNode = this._cluster.nodes.find(n => n.id === message.targetNodeId);
 
 			if (targetNode === undefined) {
 				console.log(`Node ${message.targetNodeId} not found on cluster. I'm not delivering this`);
@@ -48,6 +48,10 @@ class MessageHandler {
 					console.log(`Don't know how to handle message ${message}`)
 			}
 		}
+	}
+
+	get cluster() {
+		return this._cluster;
 	}
 
 	set cluster(value) {

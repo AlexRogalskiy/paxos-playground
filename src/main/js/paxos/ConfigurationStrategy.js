@@ -7,14 +7,19 @@ export const ConfigMixin = (nodeClass) => class extends nodeClass {
 	//   b) require a specific constructor signature
 	//   c) pass along all arguments.
 
-	addNode(node, callback) {
-		const newCluster = new Cluster(this.cluster.nodes.concat(node));
-		const operation = new ConfigOperation(ConfigOperationType.ADD_NODE, newCluster, node, callback);
+	addNode(newNode, callback) {
+		const newCluster = new Cluster(this.cluster.nodes.concat(newNode));
+		const operation = new ConfigOperation(ConfigOperationType.ADD_NODE, newCluster, newNode, callback);
 		this.proposeUpdate(operation, EntryType.CONFIG_CHANGE);
 	}
 
-	removeNode(node) {
-		//TODO implement
+	removeNode(nodeToRemove, callback) {
+		const currentNodes = this.cluster.nodes;
+		if (currentNodes.includes(nodeToRemove)) {
+			const newCluster = new Cluster(currentNodes.concat().filter(n => n !== nodeToRemove));
+			const operation = new ConfigOperation(ConfigOperationType.REMOVE_NODE, newCluster, nodeToRemove, callback);
+			this.proposeUpdate(operation, EntryType.CONFIG_CHANGE);
+		}
 	}
 
 	resolutionAchieved(resolution) {
@@ -38,8 +43,10 @@ export const ConfigMixin = (nodeClass) => class extends nodeClass {
 			this.renewLease();
 		}
 
-		//TODO consider removed master scenario!
-		//TODO consider messages lost after node removal. What will happen to them
+		if (operation.operationType === ConfigOperationType.REMOVE_NODE && operation.node.id === this.masterId) {
+			//The master is gone! start election
+			this.leaseExpired();
+		}
 	}
 
 };
