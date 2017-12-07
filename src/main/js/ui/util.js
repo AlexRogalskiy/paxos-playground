@@ -25,6 +25,10 @@ util.numericCompare = function (a, b) {
 	return a - b;
 };
 
+util.getSymbolDescription = (symbol) => {
+	return String(symbol).slice(7, -1) || null
+};
+
 util.circleCoord = function (frac, cx, cy, r) {
 	var radians = 2 * Math.PI * (0.75 + frac);
 	return {

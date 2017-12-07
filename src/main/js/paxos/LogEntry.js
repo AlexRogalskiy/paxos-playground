@@ -27,7 +27,7 @@ export class LogEntry {
 }
 
 export const EntryType = {
-	APPLICATION_LEVEL: Symbol("application_level"),
-	ELECTION: Symbol("election"),
-	CONFIG_CHANGE: Symbol("config_change")
+	APPLICATION_LEVEL: Symbol("Application_level"),
+	ELECTION: Symbol("Election"),
+	CONFIG_CHANGE: Symbol("Config_change")
 };

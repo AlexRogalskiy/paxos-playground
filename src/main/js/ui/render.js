@@ -638,6 +638,13 @@ $(function () {
 			.append(li('sent', util.relativeTime(message.sendTime, model.time)))
 			.append(li('deliver', util.relativeTime(message.recvTime, model.time)))
 			.append(li('term', message.term));
+		
+		if (message.value !== undefined) {
+			fields
+				.append(li('value', message.value.value))
+				.append(li('value type', util.getSymbolDescription(message.value.entryType)));
+		}
+
 		if (message.type == 'RequestVote') {
 			if (message.direction == 'request') {
 				fields.append(li('lastLogIndex', message.lastLogIndex));
