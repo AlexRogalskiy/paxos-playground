@@ -569,10 +569,7 @@ $(function () {
 			.empty()
 			.append($('<dl class="dl-horizontal"></dl>')
 				.append(li('state', server.state))
-				.append(li('currentTerm', server.term))
-				.append(li('votedFor', server.votedFor))
-				.append(li('commitIndex', server.commitIndex))
-				.append(li('electionAlarm', util.relativeTime(server.electionAlarm, model.time)))
+				.append(li('paxos instance number', server.term))
 			);
 		var isLeader = server.isMaster();
 		if (isLeader || server.state === "candidate") {
