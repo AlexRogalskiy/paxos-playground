@@ -98,7 +98,14 @@ class Node {
 		if (!this.roles.includes(Role.ACCEPTOR)) return;
 		if (!this._isFromCurrentPaxosInstance(accept)) return;
 
-		this._paxosInstance.acceptor.handleAccept(accept);
+		const accepted = this._paxosInstance.acceptor.handleAccept(accept);
+		if (accepted) {
+			this.broadcastAccepted(accept);
+		}
+	}
+
+	broadcastAccepted(accept) {
+		this._paxosInstance.acceptor.broadcastAccepted(accept);
 	}
 
 	// ---- LEARNER ----

@@ -1,4 +1,4 @@
-import {Prepare, Promise, ProposalBuilder, ProposalId} from "./Messages.js";
+import {Accept, Accepted, Prepare, Promise, ProposalBuilder, ProposalId, Resolution} from "./Messages.js";
 import {EntryType} from "./LogEntry.js";
 
 
@@ -83,6 +83,28 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		super.handleAccept(accept);
 	}
 
+	handleAccepted(accepted) {
+		if (!this._enableOptimizations || this.isMaster() || this._masterId === undefined) {
+			super.handleAccepted(accepted)
+		} else {
+			if (accepted.sourceNodeId === this._masterId) {
+				//trust whatever the master says
+				const resolution = new Resolution(accepted);
+				this.resolutionAchieved(resolution);
+			}
+		}
+	}
+
+	broadcastAccepted(accept) {
+		if (!this._enableOptimizations || this._masterId === undefined) {
+			super.broadcastAccepted(accept);
+		} else {
+			// answer only to the designated learner -> aka the master
+			const accepted = new Accepted(accept, this._masterId);
+			this.messageHandler.send(accepted);
+		}
+	}
+
 	stop() {
 		this._masterId = undefined;
 		super.stop();
@@ -90,6 +112,10 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 
 	resolutionAchieved(resolution) {
 		const resolutionEntry = resolution.value;
+
+		if (this._enableOptimizations && this.isMaster()) {
+			this._notifyNonLeaderLearners(resolution);
+		}
 
 		if (resolutionEntry.entryType === EntryType.ELECTION) {
 			this._updateLease(resolutionEntry.value);
@@ -99,25 +125,41 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 
 		// master optimizations
 		if (this._enableOptimizations && this._masterId !== undefined) {
-			if (this.isMaster()) {
-				//call prepare on me but don't broadcast
-				const prepareMsgs = super.prepare(false);
-
-				// synthesize Promise messages from other nodes
-				prepareMsgs.forEach(prepare => {
-					if (ProposalId.compare(prepare.proposalId, ProposalBuilder.buildMasterProposalId(super.id)) !== 0) {
-						throw Error('The prepared proposal does not match with the master proposal id')
-					}
-					const promise = new Promise(super.paxosInstanceNumber, prepare, undefined, undefined);
-					super.handlePromise(promise, false)
-				});
-			} else {
-				// synthesize Prepare from master node
-				const proposalId = ProposalBuilder.buildMasterProposalId(this._masterId);
-				const prepare = new Prepare(super.paxosInstanceNumber, this._masterId, super.id, proposalId);
-				super.handlePrepare(prepare, false)
-			}
+			this._doPhase1Optimizations();
 		}
+	}
+
+	_doPhase1Optimizations() {
+		if (this.isMaster()) {
+			//call prepare on me but don't broadcast
+			const prepareMsgs = super.prepare(false);
+
+			// synthesize Promise messages from other nodes
+			prepareMsgs.forEach(prepare => {
+				if (ProposalId.compare(prepare.proposalId, ProposalBuilder.buildMasterProposalId(super.id)) !== 0) {
+					throw Error('The prepared proposal does not match with the master proposal id')
+				}
+				const promise = new Promise(super.paxosInstanceNumber, prepare, undefined, undefined);
+				super.handlePromise(promise, false)
+			});
+		} else {
+			// synthesize Prepare from master node
+			const proposalId = ProposalBuilder.buildMasterProposalId(this._masterId);
+			const prepare = new Prepare(super.paxosInstanceNumber, this._masterId, super.id, proposalId);
+			super.handlePrepare(prepare, false)
+		}
+	}
+
+	_notifyNonLeaderLearners(resolution) {
+		const learners = this._cluster.learners;
+		learners
+			.filter(learner => learner.id !== this.id)
+			.forEach(learner => {
+				//reconstruct accept
+				const accept = new Accept(resolution.paxosInstanceNumber, undefined, this.id, resolution.proposalId, resolution.value);
+				const accepted = new Accepted(accept, learner.id);
+				this.messageHandler.send(accepted);
+			});
 	}
 
 	_startElection() {

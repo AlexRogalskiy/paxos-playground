@@ -50,15 +50,16 @@ class Acceptor {
 			this._promisedProposalId = proposalId; // update proposal id number here too
 			this._acceptedProposalId = proposalId;
 			this._acceptedValue = value;
-			this._broadcastAccepted(accept)
+			return true;
 		} else {
 			//TODO should we also reject if a value has already been accepted?
 			// reject accept
-			console.log(`I'm not accepting ${proposalId} it doesn't honor my promise or previous committed values`)
+			console.log(`I'm not accepting ${proposalId} it doesn't honor my promise or previous committed values`);
+			return false;
 		}
 	}
 
-	_broadcastAccepted(accept) {
+	broadcastAccepted(accept) {
 		const learners = this._cluster.learners;
 		learners.forEach(learner => {
 			const accepted = new Accepted(accept, learner.id);
