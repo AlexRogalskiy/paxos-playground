@@ -20,9 +20,11 @@ class Proposer {
 	}
 
 	proposeUpdate(value) {
-		//TODO consider concurrent proposed values!!
-		// just remember the proposed value
-		this._proposedValue = value;
+		if (this._proposedValue === undefined) {
+			this._proposedValue = value;
+		} else {
+			console.log(`You already proposed value ${this._proposedValue} for paxos instance ${this._paxosInstanceNumber}`)
+		}
 	}
 
 	prepare(broadcast = true) {
@@ -42,7 +44,8 @@ class Proposer {
 
 	handlePromise(promise, broadcast = true) {
 		if (promise.proposalId !== this._currentProposal.proposalId) {
-			console.log(`Ignoring received promise ${promise.proposalId} as it does not match the current proposal ${this._currentProposal}`);
+			console.log(`Ignoring received promise ${promise.proposalId.toString()} as it does not match the current 
+				proposal ${this._currentProposal.proposalId}`);
 			return
 		}
 

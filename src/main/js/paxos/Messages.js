@@ -13,6 +13,10 @@ class ProposalId {
 		const result = a._proposalNumber - b._proposalNumber;
 		return result === 0 ? a._nodeId - b._nodeId : result;
 	}
+
+	toString() {
+		return `${this._proposalNumber}-${this._nodeId}`;
+	}
 }
 
 class ProposalBuilder {

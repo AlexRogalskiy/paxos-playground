@@ -4,6 +4,7 @@
  */
 
 import {Resolution} from "./Messages.js";
+import {LogEntry} from "./LogEntry.js";
 
 class Learner {
 	// _proposalMap;
@@ -100,11 +101,17 @@ class Proposal {
 
 	registerAccepted(accepted) {
 		if (this._proposalValue !== undefined) {
-			if (this._proposalValue !== accepted.value) {
-				throw new Error("Multiple values for same proposal Id")
+			if (this._proposalValue instanceof LogEntry) {
+				if (!LogEntry.equals(this._proposalValue, accepted.value)) {
+					throw new Error("Multiple values for same proposal Id")
+				}
+			} else {
+				if (this._proposalValue !== accepted.value) {
+					throw new Error("Multiple values for same proposal Id")
+				}
 			}
 		} else {
-			this._proposalValue = accepted.value
+			this._proposalValue = accepted.value;
 		}
 
 		//TODO check the proposal value

@@ -108,7 +108,7 @@ describe('Proposer', function () {
 				//check that the proposal is prepared
 				assert.ok(this.proposer._currentProposal.isPrepared());
 
-				//check the the accept was broadcasted
+				//check that the accept was broadcasted
 				this.cluster.acceptors.forEach(node => {
 					const mockAcceptor = node._paxosInstance.acceptor;
 					assert.equal(1, mockAcceptor.receivedAccepts.length);

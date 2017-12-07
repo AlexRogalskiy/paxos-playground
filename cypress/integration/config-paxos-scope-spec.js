@@ -64,7 +64,6 @@ describe('Paxos Scope with Sync and Master - Optimized and Config strategy', fun
 		});
 	});
 
-	// TODO Test call remove and add multiple times when simulation is stopped
 	// TODO test 2 nodes, 1 node, 0 nodes
 
 });

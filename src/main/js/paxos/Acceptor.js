@@ -36,7 +36,8 @@ class Acceptor {
 			}
 		} else {
 			// reject prepare
-			console.log(`I'm not preparing ${prepare}, already promised to ${this._promisedProposalId} and accepted ${this._acceptedProposalId}`)
+			console.log(`I'm not preparing ${proposalId}, already promised to ${this._promisedProposalId.toString()} and 
+				accepted ${this._acceptedProposalId !== undefined ? this._acceptedProposalId.toString() : 'nothing'}`)
 		}
 	}
 
@@ -53,7 +54,7 @@ class Acceptor {
 		} else {
 			//TODO should we also reject if a value has already been accepted?
 			// reject accept
-			console.log(`I'm not accepting ${accept} it doesn't honor my promise or previous committed values`)
+			console.log(`I'm not accepting ${proposalId} it doesn't honor my promise or previous committed values`)
 		}
 	}
 

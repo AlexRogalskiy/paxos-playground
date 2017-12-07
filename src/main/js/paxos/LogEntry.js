@@ -14,6 +14,16 @@ export class LogEntry {
 	get entryType() {
 		return this._entryType;
 	}
+
+	static equals(a, b) {
+		if (a === b) {
+			return true;
+		} else if (a === undefined || b === undefined) {
+			return false;
+		} else {
+			return a.value === b.value && a.entryType === b.entryType;
+		}
+	}
 }
 
 export const EntryType = {
