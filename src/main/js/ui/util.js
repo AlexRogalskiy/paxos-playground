@@ -16,6 +16,35 @@ util.value = function (v) {
 	};
 };
 
+//TODO not using LogEntry because it complicates script loading
+util.getLogEntryValue = (logEntry) => {
+	const logEntryString = util.getSymbolDescription(logEntry.entryType);
+	switch (logEntryString) {
+		case "Application_level":
+			return logEntry.value;
+		case "Election":
+			return logEntry.value;
+		case "Config_change":
+			const operation = logEntry.value;
+			const operationType = util.getSymbolDescription(operation.operationType);
+			const nodeId = operation.node.id;
+			return operationType === "add_node" ? `Add ${nodeId}` : `Remove ${nodeId}`;
+	}
+};
+
+//TODO not using LogEntry because it complicates script loading
+util.getColorClass = (logEntry) => {
+	const logEntryString = util.getSymbolDescription(logEntry.entryType);
+	switch (logEntryString) {
+		case "Application_level":
+			return "color-application-level";
+		case "Election":
+			return "color-election";
+		case "Config_change":
+			return "color-config-change";
+	}
+};
+
 util.randomBetween = function (min, max) {
 	return Math.random() * (max - min) + min;
 };

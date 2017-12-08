@@ -360,6 +360,21 @@ a#time-button {
   margin-left:-7px;
 }
 
+.color-application-level {
+  fill: #a6d854;
+  background: #a6d854;
+}
+
+.color-config-change {
+  fill: #8da0cb;
+  background: #8da0cb;
+}
+
+.color-election {
+  fill: #fc8d62;
+  background: #fc8d62;
+}
+
 .color-0{fill: #FC0FC0; background: #FC0FC0}/*pink*/
 .color-1{fill: #4CAF50; background: #4CAF50}/*green*/
 .color-2{fill: #2196F3; background: #2196F3} /*light blue*/

@@ -127,7 +127,7 @@ class Node {
 		this._log.push({
 			value: logEntry.value,
 			paxosInstanceNumber: this.paxosInstanceNumber,
-			type: logEntry.entryType
+			entryType: logEntry.entryType
 		});
 
 		//advance paxos instance

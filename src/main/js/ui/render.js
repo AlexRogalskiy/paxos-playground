@@ -339,7 +339,7 @@ $(function () {
 							if (array_id < server.log.length) {
 								Array.prototype.push.apply(line, [
 									'class= "commited ',
-									'color-', server.log[array_id].paxosInstanceNumber % 10,
+									util.getColorClass(server.log[array_id]),
 									server.log[array_id].isConfig ? ' config' : '',
 									server.log[array_id].isNoop ? ' noop' : '',
 								]);
@@ -347,7 +347,7 @@ $(function () {
 							Array.prototype.push.apply(line, [
 								'">',
 								(array_id >= server.log.length ? '' : (
-									server.log[array_id].paxosInstanceNumber +
+									util.getLogEntryValue(server.log[array_id]) +
 									(!server.log[array_id].isConfig ? '' : (
 										'C<sub>' +
 										(server.log[array_id].isAdd ? '+' : '-') +

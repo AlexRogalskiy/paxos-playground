@@ -55,7 +55,7 @@ describe('Simple Paxos Scope', function () {
 
 			//TODO other messages are hard to test
 
-			checkLog(['0']);
+			checkLog(['v']);
 		});
 	});
 
@@ -86,7 +86,7 @@ describe('Simple Paxos Scope', function () {
 		});
 
 		it('should add only one value to the log', function () {
-			checkLog(['0']);
+			checkLog(['v']);
 		});
 	});
 

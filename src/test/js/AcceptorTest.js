@@ -73,7 +73,10 @@ describe('Acceptor', function () {
 		describe('handleAccept()', function () {
 			it(`it should broadcast accepted if it didn't make any promise`, function () {
 				const accept = new Accept(0, 0, 0, new ProposalId(0), "some value");
-				this.acceptor.handleAccept(accept);
+				const accepted = this.acceptor.handleAccept(accept);
+				if (accepted) {
+					this.acceptor.broadcastAccepted(accept);
+				}
 
 				this.cluster.learners.forEach(node => {
 					const mockLearner = node._paxosInstance.learner;
