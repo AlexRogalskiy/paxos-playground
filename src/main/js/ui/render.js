@@ -339,7 +339,7 @@ $(function () {
 							if (array_id < server.log.length) {
 								Array.prototype.push.apply(line, [
 									'class= "commited ',
-									util.getColorClass(server.log[array_id]),
+									util.getLogClass(server.log[array_id]),
 									server.log[array_id].isConfig ? ' config' : '',
 									server.log[array_id].isNoop ? ' noop' : '',
 								]);

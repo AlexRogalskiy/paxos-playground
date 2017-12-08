@@ -33,15 +33,15 @@ util.getLogEntryValue = (logEntry) => {
 };
 
 //TODO not using LogEntry because it complicates script loading
-util.getColorClass = (logEntry) => {
+util.getLogClass = (logEntry) => {
 	const logEntryString = util.getSymbolDescription(logEntry.entryType);
 	switch (logEntryString) {
 		case "Application_level":
-			return "color-application-level";
+			return "log-application-level";
 		case "Election":
-			return "color-election";
+			return "log-election";
 		case "Config_change":
-			return "color-config-change";
+			return "log-config-change";
 	}
 };
 

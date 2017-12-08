@@ -360,17 +360,18 @@ a#time-button {
   margin-left:-7px;
 }
 
-.color-application-level {
+.log-application-level {
   fill: #a6d854;
   background: #a6d854;
 }
 
-.color-config-change {
+.log-config-change {
+  font-size: 12pt;
   fill: #8da0cb;
   background: #8da0cb;
 }
 
-.color-election {
+.log-election {
   fill: #fc8d62;
   background: #fc8d62;
 }
