@@ -175,6 +175,7 @@ class Node {
 	}
 
 	isMaster() {
+		return false;
 	}
 
 	get roles() {

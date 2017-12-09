@@ -10,7 +10,7 @@ export const SyncMixin = (nodeClass) => class extends nodeClass {
 		super(id, roles, enableOptimizations);
 	}
 
-	_sendSyncRequest() {
+	sendSyncRequest() {
 		if (this.isDown()) return;
 
 		// select a node randomly from peers
@@ -19,7 +19,7 @@ export const SyncMixin = (nodeClass) => class extends nodeClass {
 		super.messageHandler.send(syncRequest);
 	}
 
-	handleSyncRequest(syncRequest) {
+	handleSyncRequest(syncRequest, masterId = undefined) {
 		//Send catchup
 		if (this.isDown()) return;
 
@@ -28,7 +28,7 @@ export const SyncMixin = (nodeClass) => class extends nodeClass {
 
 		const firstMissingIdx = super.log.findIndex(logEntry => logEntry.paxosInstanceNumber >= syncRequest.paxosInstanceNumber);
 		const missingLogEntries = super.log.slice(firstMissingIdx);
-		const catchUp = new CatchUp(syncRequest, currentInstanceNumber, missingLogEntries, super.cluster);
+		const catchUp = new CatchUp(syncRequest, currentInstanceNumber, missingLogEntries, super.cluster, masterId);
 		super.messageHandler.send(catchUp);
 	}
 
@@ -42,13 +42,13 @@ export const SyncMixin = (nodeClass) => class extends nodeClass {
 	updateTime(time) {
 		if (this.lastSyncTime === undefined || time - this.lastSyncTime >= SYNC_INTERVAL) {
 			this.lastSyncTime = time;
-			this._sendSyncRequest();
+			this.sendSyncRequest();
 		}
 	}
 
 	start() {
 		super.start();
-		// this._sendSyncRequest(); // eager sync when coming back online
+		// this.sendSyncRequest(); // eager sync when coming back online
 	}
 
 	_randomElementFromArray(array) {

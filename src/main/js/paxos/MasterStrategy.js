@@ -20,7 +20,7 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 
 	updateTime(time) {
 		if (this._electionsGoingOn() && this._hasLeaseExpired(time)) {
-			if (this._masterId !== undefined) {
+			if (this._masterId !== undefined && this.isMaster()) {
 				console.log(`Node ${super.id} says: My lease expired while waiting for confirmation, I'm no longer the master`);
 				//Reset master but don't start election because there's one in progress already
 				this._masterId = undefined;
@@ -85,26 +85,15 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 	}
 
 	handleAccepted(accepted) {
-		if (!this._enableOptimizations || this.isMaster()) {
+		if (!this._enableOptimizations || this.isMaster() || this._masterId === undefined) {
 			super.handleAccepted(accepted)
-		} else if (this._masterId === undefined) {
-			if (accepted.value.entryType === EntryType.ELECTION) {
-				super.handleAccepted(accepted)
-			} else {
-				//Not an election, I don't know the master but still I'm getting an Accepted message.
-				//I'll trust that the sender is actually the master.
-				//The unsolved thing here is that the timer now could be greater than the one from the master
-				this._updateLease(accepted.sourceNodeId);
-
-				this._trustMasterHandleAccepted(accepted)
-			}
 		} else {
 			if (accepted.sourceNodeId === this._masterId) {
+				//trust whatever the master says
 				this._trustMasterHandleAccepted(accepted);
 			}
 		}
 	}
-
 	_trustMasterHandleAccepted(accepted) {
 		if (super.isDown()) return;
 		if (!super.roles.includes(Role.LEARNER)) return;
@@ -203,6 +192,19 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		}
 
 		this._proposedLeaseStartTime = undefined;
+	}
+
+	handleSyncRequest(syncRequest) {
+		super.handleSyncRequest(syncRequest, this._masterId);
+	}
+
+	handleCatchup(catchUp) {
+		if (this.isDown()) return;
+		if (catchUp.paxosInstanceNumber <= super.paxosInstanceNumber) return;
+
+		super.doCatchup(catchUp.paxosInstanceNumber, catchUp.missingLogEntries, catchUp.cluster);
+
+		this._masterId = catchUp.masterId;
 	}
 
 	leaseExpired() {
