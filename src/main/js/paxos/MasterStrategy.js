@@ -214,6 +214,10 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		return this._masterId;
 	}
 
+	get leaseStartTime() {
+		return this._leaseStartTime;
+	}
+
 };
 
-const LEASE_WINDOW = 200000;
+export const LEASE_WINDOW = 200000;

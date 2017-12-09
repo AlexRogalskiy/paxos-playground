@@ -148,6 +148,16 @@ $(function () {
 	render.servers = function (serversSame) {
 		state.current.servers.forEach(function (server) {
 			var serverNode = $('#server-' + server.id, svg);
+
+			if (state.current.config.startsWith("master") && Number.isFinite(server.electionAlarm)) {
+				//render election timer
+				$('path', serverNode)
+					.attr('d', arcSpec(serverSpec(server.id),
+						util.clamp((server.electionAlarm - state.current.time) /
+							(ELECTION_TIMEOUT),
+							0, 1)));
+			}
+
 			if (!serversSame) {
 				$('text.term', serverNode).text(server.term);
 				serverNode.attr('class', 'server ' + server.state);
