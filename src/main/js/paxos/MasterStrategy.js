@@ -1,5 +1,6 @@
 import {Accept, Accepted, Prepare, Promise, ProposalBuilder, ProposalId, Resolution} from "./Messages.js";
 import {EntryType} from "./LogEntry.js";
+import {Role} from "./Node.js";
 
 
 export const MasterMixin = (nodeClass) => class extends nodeClass {
@@ -84,16 +85,35 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 	}
 
 	handleAccepted(accepted) {
-		if (!this._enableOptimizations || this.isMaster() || this._masterId === undefined) {
+		if (!this._enableOptimizations || this.isMaster()) {
 			super.handleAccepted(accepted)
+		} else if (this._masterId === undefined) {
+			if (accepted.value.entryType === EntryType.ELECTION) {
+				super.handleAccepted(accepted)
+			} else {
+				//Not an election, I don't know the master but still I'm getting an Accepted message.
+				//I'll trust that the sender is actually the master.
+				//The unsolved thing here is that the timer now could be greater than the one from the master
+				this._updateLease(accepted.sourceNodeId);
+
+				this._trustMasterHandleAccepted(accepted)
+			}
 		} else {
 			if (accepted.sourceNodeId === this._masterId) {
-				//trust whatever the master says
-				const resolution = new Resolution(accepted);
-				this.resolutionAchieved(resolution);
+				this._trustMasterHandleAccepted(accepted);
 			}
 		}
 	}
+
+	_trustMasterHandleAccepted(accepted) {
+		if (super.isDown()) return;
+		if (!super.roles.includes(Role.LEARNER)) return;
+		if (!this.isFromCurrentPaxosInstance(accepted)) return;
+
+		//trust whatever the master says
+		const resolution = new Resolution(accepted);
+		this.resolutionAchieved(resolution);
+	};
 
 	broadcastAccepted(accept) {
 		if (!this._enableOptimizations || this._masterId === undefined) {

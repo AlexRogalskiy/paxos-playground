@@ -6,6 +6,10 @@ export const SyncMixin = (nodeClass) => class extends nodeClass {
 	//   b) require a specificconstructor signature
 	//   c) pass along all arguments.
 
+	constructor(id, roles, enableOptimizations) {
+		super(id, roles, enableOptimizations);
+	}
+
 	_sendSyncRequest() {
 		if (this.isDown()) return;
 

@@ -78,7 +78,7 @@ class Node {
 	handlePromise(promise, broadcast = true) {
 		if (this.isDown()) return;
 		if (!this.roles.includes(Role.PROPOSER)) return;
-		if (!this._isFromCurrentPaxosInstance(promise)) return;
+		if (!this.isFromCurrentPaxosInstance(promise)) return;
 
 		this._paxosInstance.proposer.handlePromise(promise, broadcast);
 	}
@@ -88,7 +88,7 @@ class Node {
 	handlePrepare(prepare, broadcast = true) {
 		if (this.isDown()) return;
 		if (!this.roles.includes(Role.ACCEPTOR)) return;
-		if (!this._isFromCurrentPaxosInstance(prepare)) return;
+		if (!this.isFromCurrentPaxosInstance(prepare)) return;
 
 		this._paxosInstance.acceptor.handlePrepare(prepare, broadcast);
 	}
@@ -96,7 +96,7 @@ class Node {
 	handleAccept(accept) {
 		if (this.isDown()) return;
 		if (!this.roles.includes(Role.ACCEPTOR)) return;
-		if (!this._isFromCurrentPaxosInstance(accept)) return;
+		if (!this.isFromCurrentPaxosInstance(accept)) return;
 
 		const accepted = this._paxosInstance.acceptor.handleAccept(accept);
 		if (accepted) {
@@ -113,11 +113,11 @@ class Node {
 	handleAccepted(accepted) {
 		if (this.isDown()) return;
 		if (!this.roles.includes(Role.LEARNER)) return;
-		if (!this._isFromCurrentPaxosInstance(accepted)) return;
+		if (!this.isFromCurrentPaxosInstance(accepted)) return;
 
 		const resolution = this._paxosInstance.learner.handleAccepted(accepted);
 
-		if (resolution !== undefined && this._isFromCurrentPaxosInstance(resolution)) {
+		if (resolution !== undefined && this.isFromCurrentPaxosInstance(resolution)) {
 			this.resolutionAchieved(resolution);
 		}
 	}
@@ -160,7 +160,7 @@ class Node {
 		return this._id;
 	}
 
-	_isFromCurrentPaxosInstance(msg) {
+	isFromCurrentPaxosInstance(msg) {
 		return msg.paxosInstanceNumber === this._paxosInstance.paxosInstanceNumber;
 	}
 
