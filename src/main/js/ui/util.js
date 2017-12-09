@@ -21,7 +21,7 @@ util.proposalIdToString = (proposalId) => {
 };
 
 //TODO not using LogEntry because it complicates script loading
-util.getProposedLogEntryValue = (logEntry) => {
+util.getLogEntryValueLong = (logEntry) => {
 	if (logEntry === undefined) return "undefined";
 	const logEntryString = util.getSymbolDescription(logEntry.entryType);
 	switch (logEntryString) {

@@ -583,10 +583,10 @@ $(function () {
 			.append($dl
 				.append(li('State', server.state))
 				.append(li('Paxos instance number', server.term))
-				.append(li('Proposed value', util.getProposedLogEntryValue(server.getProposedValue())))
+				.append(li('Proposed value', util.getLogEntryValueLong(server.getProposedValue())))
 				.append(li('Promised proposal id', util.proposalIdToString(server.getPromisedProposalId())))
 				.append(li('Accepted proposal id ', util.proposalIdToString(server.getAcceptedProposalId())))
-				.append(li('Accepted value ', util.getProposedLogEntryValue(server.getAcceptedValue())))
+				.append(li('Accepted value ', util.getLogEntryValueLong(server.getAcceptedValue())))
 			);
 
 		if (state.current.config.startsWith("master")) {
@@ -623,12 +623,12 @@ $(function () {
 			.append(li('to', 'S' + message.to))
 			.append(li('sent', util.relativeTime(message.sendTime, model.time)))
 			.append(li('deliver', util.relativeTime(message.recvTime, model.time)))
-			.append(li('term', message.term));
-		
+			.append(li('paxos instance number', message.term))
+			.append(li('proposal id', util.proposalIdToString(message.proposalId)));
+
 		if (message.value !== undefined) {
 			fields
-				.append(li('value', message.value.value))
-				.append(li('value type', util.getSymbolDescription(message.value.entryType)));
+				.append(li('value', util.getLogEntryValueLong(message.value)))
 		}
 
 		if (message.type == 'RequestVote') {
