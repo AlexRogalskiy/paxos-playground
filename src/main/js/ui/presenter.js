@@ -41,46 +41,19 @@ $(function () {
 		render.update();
 	});
 
+	window.onkeydown = function (e) {
+		return !(e.keyCode === 32);
+	};
+
 	$(window).keyup(function (e) {
 		if (e.target.id === "title") {
 			return;
 		}
-		const leader = paxos.getLeader(state.current);
+
 		let processed = false;
 		if (e.keyCode === ' '.charCodeAt(0) || e.keyCode === 190 /* dot, emitted by Logitech remote */) {
 			$('.modal').modal('hide');
 			playback.toggle();
-			processed = true;
-		} else if (e.keyCode === 'C'.charCodeAt(0)) {
-			if (leader !== null) {
-				state.fork();
-				paxos.clientRequest(leader);
-				state.save();
-				render.update();
-				$('.modal').modal('hide');
-			}
-			processed = true;
-		} else if (e.keyCode === 'R'.charCodeAt(0)) {
-			if (leader !== null) {
-				state.fork();
-				paxos.stop(leader);
-				paxos.resume(leader);
-				state.save();
-				render.update();
-				$('.modal').modal('hide');
-			}
-			processed = true;
-		} else if (e.keyCode === 'B'.charCodeAt(0)) {
-			state.fork();
-			paxos.resumeAll(state.current);
-			state.save();
-			render.update();
-			$('.modal').modal('hide');
-			processed = true;
-		} else if (e.keyCode === 'F'.charCodeAt(0)) {
-			state.fork();
-			render.update();
-			$('.modal').modal('hide');
 			processed = true;
 		} else if (e.keyCode === 191 && e.shiftKey) { /* question mark */
 			playback.pause();
