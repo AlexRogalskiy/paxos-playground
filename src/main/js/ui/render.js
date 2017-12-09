@@ -575,45 +575,24 @@ $(function () {
 		var li = function (label, value) {
 			return '<dt>' + label + '</dt><dd>' + value + '</dd>';
 		};
+
+		const $dl = $('<dl class="dl-horizontal"></dl>');
+
 		$('.modal-body', m)
 			.empty()
-			.append($('<dl class="dl-horizontal"></dl>')
-				.append(li('state', server.state))
-				.append(li('paxos instance number', server.term))
+			.append($dl
+				.append(li('State', server.state))
+				.append(li('Paxos instance number', server.term))
+				.append(li('Proposed value', util.getProposedLogEntryValue(server.getProposedValue())))
+				.append(li('Promised proposal id', util.proposalIdToString(server.getPromisedProposalId())))
+				.append(li('Accepted proposal id ', util.proposalIdToString(server.getAcceptedProposalId())))
+				.append(li('Accepted value ', util.getProposedLogEntryValue(server.getAcceptedValue())))
 			);
-		var isLeader = server.isMaster();
-		if (isLeader || server.state === "candidate") {
-			var tableHeader = $('<tr></tr>');
-			var peerTable = $('<table></table>');
-			peerTable.addClass('table table-condensed');
-			tableHeader.append('<th>peer</th>');
-			if (isLeader)
-				tableHeader
-					.append('<th>next index</th>')
-					.append('<th>match index</th>');
-			tableHeader
-				.append('<th>vote granted</th>')
-				.append('<th>RPC due</th>');
-			if (isLeader) tableHeader.append('<th>heartbeat due</th>');
-			peerTable.append(tableHeader);
-			server.peers.forEach(function (peer) {
-				var tableRow = $('<tr></tr>');
-				tableRow.append('<td>S' + peer + '</td>')
-				if (isLeader)
-					tableRow
-						.append('<td>' + server.nextIndex[peer] + '</td>')
-						.append('<td>' + server.matchIndex[peer] + '</td>');
-				tableRow
-					.append('<td>' + server.voteGranted[peer] + '</td>')
-					//  Dirty hack to replace negative timers from being displayed in rpcDue
-					.append('<td>' + util.relativeTime(server.rpcDue[peer] === 0 ? util.Inf : server.rpcDue[peer], model.time) + '</td>');
-				if (isLeader) tableRow.append('<td>' + util.relativeTime(server.heartbeatDue[peer], model.time) + '</td>');
-				peerTable.append(tableRow);
-			});
-			$('.modal-body dl', m)
-				.append($('<dt>peers</dt>'))
-				.append($('<dd></dd>').append(peerTable));
+
+		if (state.current.config.startsWith("master")) {
+			$dl.append(li('Master Id', server.masterId))
 		}
+
 		var footer = $('.modal-footer', m);
 		footer.empty();
 		serverActions.filter(function (action) {

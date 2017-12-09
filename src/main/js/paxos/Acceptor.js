@@ -67,6 +67,18 @@ class Acceptor {
 		});
 	}
 
+	get promisedProposalId() {
+		return this._promisedProposalId;
+	}
+
+	get acceptedProposalId() {
+		return this._acceptedProposalId;
+	}
+
+	get acceptedValue() {
+		return this._acceptedValue;
+	}
+
 	_honorsPromise(proposalId) {
 		return this._promisedProposalId === undefined || ProposalId.compare(proposalId, this._promisedProposalId) >= 0
 	}

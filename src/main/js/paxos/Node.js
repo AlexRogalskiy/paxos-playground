@@ -83,6 +83,13 @@ class Node {
 		this._paxosInstance.proposer.handlePromise(promise, broadcast);
 	}
 
+	getProposedValue() {
+		if (!this.roles.includes(Role.PROPOSER)) return;
+
+		const proposer = this._paxosInstance.proposer;
+		return proposer.proposedValue;
+	}
+
 	// ---- ACCEPTOR ----
 
 	handlePrepare(prepare, broadcast = true) {
@@ -106,6 +113,24 @@ class Node {
 
 	broadcastAccepted(accept) {
 		this._paxosInstance.acceptor.broadcastAccepted(accept);
+	}
+
+	getPromisedProposalId() {
+		if (!this.roles.includes(Role.ACCEPTOR)) return;
+
+		return this._paxosInstance.acceptor.promisedProposalId;
+	}
+
+	getAcceptedProposalId() {
+		if (!this.roles.includes(Role.ACCEPTOR)) return;
+
+		return this._paxosInstance.acceptor.acceptedProposalId
+	}
+
+	getAcceptedValue() {
+		if (!this.roles.includes(Role.ACCEPTOR)) return;
+
+		return this._paxosInstance.acceptor.acceptedValue;
 	}
 
 	// ---- LEARNER ----

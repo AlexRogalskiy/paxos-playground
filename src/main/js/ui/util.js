@@ -16,8 +16,30 @@ util.value = function (v) {
 	};
 };
 
+util.proposalIdToString = (proposalId) => {
+	return proposalId === undefined ? "undefined" : proposalId.toString();
+};
+
+//TODO not using LogEntry because it complicates script loading
+util.getProposedLogEntryValue = (logEntry) => {
+	if (logEntry === undefined) return "undefined";
+	const logEntryString = util.getSymbolDescription(logEntry.entryType);
+	switch (logEntryString) {
+		case "Application_level":
+			return `Application level: ${logEntry.value}`;
+		case "Election":
+			return `Voted for ${logEntry.value}`;
+		case "Config_change":
+			const operation = logEntry.value;
+			const operationType = util.getSymbolDescription(operation.operationType);
+			const nodeId = operation.node.id;
+			return operationType === "add_node" ? `Add node ${nodeId}` : `Remove node ${nodeId}`;
+	}
+};
+
 //TODO not using LogEntry because it complicates script loading
 util.getLogEntryValue = (logEntry) => {
+	if (logEntry === undefined) return "undefined";
 	const logEntryString = util.getSymbolDescription(logEntry.entryType);
 	switch (logEntryString) {
 		case "Application_level":
