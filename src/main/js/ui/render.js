@@ -150,12 +150,17 @@ $(function () {
 			var serverNode = $('#server-' + server.id, svg);
 
 			if (state.current.config.startsWith("master") && Number.isFinite(server.electionAlarm)) {
-				//render election timer
-				$('path', serverNode)
-					.attr('d', arcSpec(serverSpec(server.id),
-						util.clamp((server.electionAlarm - state.current.time) /
-							(ELECTION_TIMEOUT),
-							0, 1)));
+				if (!server.isDown()) {
+					//render election timer
+					$('path', serverNode)
+						.show()
+						.attr('d', arcSpec(serverSpec(server.id),
+							util.clamp((server.electionAlarm - state.current.time) /
+								(ELECTION_TIMEOUT),
+								0, 1)));
+				} else {
+					$('path', serverNode).hide();
+				}
 			}
 
 			if (!serversSame) {
