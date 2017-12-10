@@ -28,7 +28,7 @@ describe('Learner', function () {
 
 		describe('handleAccepted()', function () {
 			it(`it should register new accepted message`, function () {
-				const proposalId = new ProposalId(0);
+				const proposalId = new ProposalId(0, 0);
 				const accept = new Accept(0, 1, 1, proposalId, "some value");
 				const accepted = new Accepted(accept, 0);
 				this.learner.handleAccepted(accepted);
@@ -38,7 +38,7 @@ describe('Learner', function () {
 
 			it(`it should get to resolution once the quorum is achieved`, function () {
 				const value = "some value";
-				const proposalId = new ProposalId(0);
+				const proposalId = new ProposalId(0, 0);
 
 				const accept0 = new Accept(0, 0, 0, proposalId, value);
 				const accepted0 = new Accepted(accept0, 0);
@@ -53,7 +53,7 @@ describe('Learner', function () {
 
 			it(`it should ignore message and return resolution once resolution was achieved`, function () {
 				const value = "some value";
-				const proposalId = new ProposalId(0);
+				const proposalId = new ProposalId(0, 0);
 
 				const accept0 = new Accept(0, 0, 0, proposalId, value);
 				const accepted0 = new Accepted(accept0, 0);
@@ -74,7 +74,7 @@ describe('Learner', function () {
 			});
 
 			it(`it should throw exception if we receive same proposalId for different values`, function () {
-				const proposalId = new ProposalId(0);
+				const proposalId = new ProposalId(0, 0);
 
 				const accept0 = new Accept(0, 0, 0, proposalId, "some value");
 				const accepted0 = new Accepted(accept0, 0);
@@ -86,8 +86,8 @@ describe('Learner', function () {
 			});
 
 			it(`it should ignore messages older than the highest proposalId`, function () {
-				const proposalIdOld = new ProposalId(0);
-				const proposalIdNew = new ProposalId(0);
+				const proposalIdOld = new ProposalId(0, 0);
+				const proposalIdNew = new ProposalId(0, 0);
 
 				const accept0 = new Accept(0, 0, 0, proposalIdNew, "some value");
 				const accepted0 = new Accepted(accept0, 0);

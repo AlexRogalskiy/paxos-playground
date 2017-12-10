@@ -565,7 +565,8 @@ $(function () {
 		['stop', paxos.stop],
 		['resume', paxos.resume],
 		// ['restart', paxos.restart],
-		['request', paxos.clientRequest],
+		['request X', paxos.clientRequestX],
+		['request Y', paxos.clientRequestY],
 		['remove', paxos.removeServer],
 	];
 

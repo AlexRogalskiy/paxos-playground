@@ -63,8 +63,8 @@ describe('Proposer', function () {
 
 		describe('handlePromise()', () => {
 			beforeEach(function () {
-				this.previousProposalId1 = new ProposalId(0);
-				this.previousProposalId2 = new ProposalId(0);
+				this.previousProposalId1 = new ProposalId(0, 0);
+				this.previousProposalId2 = new ProposalId(0, 0);
 
 				//need to call prepare first to populate currentProposal
 				this._proposedValue = "some value";

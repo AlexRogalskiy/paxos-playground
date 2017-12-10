@@ -49,8 +49,12 @@ const ELECTION_TIMEOUT = 200000;
 		model.messageHandler.dropMessage(message);
 	};
 
-	paxos.clientRequest = (server) => {
-		server.proposeUpdate("v")
+	paxos.clientRequestX = (server) => {
+		server.proposeUpdate("X")
+	};
+
+	paxos.clientRequestY = (server) => {
+		server.proposeUpdate("Y")
 	};
 
 	// Leadership is not implemented yet. If no server is leader all are leaders

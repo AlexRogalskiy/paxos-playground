@@ -3,7 +3,7 @@
  * selected, and tracks which peers have accepted the final value.
  */
 
-import {Resolution} from "./Messages.js";
+import {ProposalId, Resolution} from "./Messages.js";
 import {LogEntry} from "./LogEntry.js";
 
 class Learner {
@@ -63,7 +63,7 @@ class Learner {
 	 */
 	_isOldMsg(accepted) {
 		const lastProposalIdSeenForNode = this._lastAcceptedProposalsMap.get(accepted.sourceNodeId);
-		if (lastProposalIdSeenForNode <= accepted.proposalId) {
+		if (lastProposalIdSeenForNode !== undefined && ProposalId.compare(lastProposalIdSeenForNode, accepted.proposalId) >= 0) { //<=
 			return true
 		} else {
 			//update map
