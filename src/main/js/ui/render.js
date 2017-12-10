@@ -559,7 +559,7 @@ $(function () {
 	var serverActions = [
 		['stop', paxos.stop],
 		['resume', paxos.resume],
-		['restart', paxos.restart],
+		// ['restart', paxos.restart],
 		['request', paxos.clientRequest],
 		['remove', paxos.removeServer],
 	];
