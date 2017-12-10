@@ -115,6 +115,8 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 	}
 
 	stop() {
+		this._leaseStartTime = undefined;
+		this._proposedLeaseStartTime = undefined;
 		this._masterId = undefined;
 		super.stop();
 	}

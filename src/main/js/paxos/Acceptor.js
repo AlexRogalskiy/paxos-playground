@@ -29,7 +29,7 @@ class Acceptor {
 		let promise;
 		if (this._honorsPromise(proposalId) && !this._isAccepted(proposalId)) {
 			// accept prepare
-			promise = new Promise(this._paxosInstanceNumber, prepare, this._acceptedValue, this._acceptedProposalId);
+			promise = new Promise(this._paxosInstanceNumber, prepare, this._acceptedProposalId, this._acceptedValue);
 			this._promisedProposalId = proposalId;
 			if (broadcast) {
 				this.messageHandler.send(promise);
