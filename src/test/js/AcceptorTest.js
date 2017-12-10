@@ -35,7 +35,7 @@ describe('Acceptor', function () {
 		describe('handlePrepare()', function () {
 
 			it(`the proposer should receive a promise`, function () {
-				const prepare = new Prepare(0, 0, 0, new ProposalId(1));
+				const prepare = new Prepare(0, 0, 0, new ProposalId(0, 1));
 				this.acceptor.handlePrepare(prepare);
 
 				const proposer = this.cluster.proposers[0]._paxosInstance.proposer;
@@ -44,8 +44,8 @@ describe('Acceptor', function () {
 			});
 
 			it(`it should honor previous promises`, function () {
-				const prepare1 = new Prepare(0, 0, 0, new ProposalId(0));
-				const prepare2 = new Prepare(0, 0, 0, new ProposalId(0));
+				const prepare1 = new Prepare(0, 0, 0, new ProposalId(0, 0));
+				const prepare2 = new Prepare(0, 0, 0, new ProposalId(1, 0));
 				this.acceptor.handlePrepare(prepare2);
 
 				this.acceptor.handlePrepare(prepare1);
@@ -57,10 +57,10 @@ describe('Acceptor', function () {
 			});
 
 			it(`it should reject prepares after a value has been accepted`, function () {
-				const accept1 = new Accept(0, 1, 1, new ProposalId(0), "some value");
+				const accept1 = new Accept(0, 1, 1, new ProposalId(0, 0), "some value");
 				this.acceptor.handleAccept(accept1);
 
-				const prepare1 = new Prepare(1, 1, new ProposalId(0));
+				const prepare1 = new Prepare(1, 1, new ProposalId(0, 0));
 				this.acceptor.handlePrepare(prepare1);
 
 				//proposer should not receive any message
@@ -72,8 +72,11 @@ describe('Acceptor', function () {
 
 		describe('handleAccept()', function () {
 			it(`it should broadcast accepted if it didn't make any promise`, function () {
-				const accept = new Accept(0, 0, 0, new ProposalId(0), "some value");
-				this.acceptor.handleAccept(accept);
+				const accept = new Accept(0, 0, 0, new ProposalId(0, 0), "some value");
+				const accepted = this.acceptor.handleAccept(accept);
+				if (accepted) {
+					this.acceptor.broadcastAccepted(accept);
+				}
 
 				this.cluster.learners.forEach(node => {
 					const mockLearner = node._paxosInstance.learner;
@@ -86,9 +89,9 @@ describe('Acceptor', function () {
 			});
 
 			it(`it should not answer old accepts if it has made a new promise`, function () {
-				const accept = new Accept(0, 0, 0, 0, new ProposalId(0), "some value");
+				const accept = new Accept(0, 0, 0, 0, new ProposalId(0, 0), "some value");
 
-				const prepare = new Prepare(0, 0, 0, new ProposalId(0));
+				const prepare = new Prepare(0, 0, 0, new ProposalId(0, 0));
 				this.acceptor.handlePrepare(prepare);
 
 				// there was a new promise after the accept

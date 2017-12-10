@@ -6,6 +6,9 @@ export const ConfigMixin = (nodeClass) => class extends nodeClass {
 	//   a) not define a constructor,
 	//   b) require a specific constructor signature
 	//   c) pass along all arguments.
+	constructor(id, roles, model, enableOptimizations) {
+		super(id, roles, model, enableOptimizations)
+	}
 
 	addNode(newNode, callback) {
 		const newCluster = new Cluster(this.cluster.nodes.concat(newNode));
@@ -43,7 +46,8 @@ export const ConfigMixin = (nodeClass) => class extends nodeClass {
 			this.renewLease();
 		}
 
-		if (operation.operationType === ConfigOperationType.REMOVE_NODE && operation.node.id === this.masterId) {
+		if (resolutionEntry.entryType === EntryType.CONFIG_CHANGE
+			&& operation.operationType === ConfigOperationType.REMOVE_NODE && operation.node.id === this._masterId) {
 			//The master is gone! start election
 			this.leaseExpired();
 		}

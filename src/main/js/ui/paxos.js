@@ -11,7 +11,7 @@ const paxos = {};
 const RPC_TIMEOUT = 50000; //TODO use it to make progress
 const MIN_RPC_LATENCY = 10000;
 const MAX_RPC_LATENCY = 15000;
-const ELECTION_TIMEOUT = 100000;
+const ELECTION_TIMEOUT = 200000;
 
 (function () {
 	paxos.getServerIndexById = (model, id) => model.servers.findIndex(srv => srv.id === id);
@@ -22,7 +22,8 @@ const ELECTION_TIMEOUT = 100000;
 		model.servers.forEach(server => {
 			server.updateTime(model.time);
 			server.term = server.paxosInstanceNumber;
-			server.state = server.isMaster() ? 'leader' : 'follower'
+			server.state = server.isMaster() ? 'leader' : 'follower';
+			server.electionAlarm = server.leaseStartTime + ELECTION_TIMEOUT;
 		})
 	};
 
@@ -48,8 +49,12 @@ const ELECTION_TIMEOUT = 100000;
 		model.messageHandler.dropMessage(message);
 	};
 
-	paxos.clientRequest = (server) => {
-		server.proposeUpdate("v")
+	paxos.clientRequestX = (server) => {
+		server.proposeUpdate("X")
+	};
+
+	paxos.clientRequestY = (server) => {
+		server.proposeUpdate("Y")
 	};
 
 	// Leadership is not implemented yet. If no server is leader all are leaders

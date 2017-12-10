@@ -1,5 +1,6 @@
 import {Accept, Accepted, Prepare, Promise, ProposalBuilder, ProposalId, Resolution} from "./Messages.js";
 import {EntryType} from "./LogEntry.js";
+import {Role} from "./Node.js";
 
 
 export const MasterMixin = (nodeClass) => class extends nodeClass {
@@ -19,7 +20,7 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 
 	updateTime(time) {
 		if (this._electionsGoingOn() && this._hasLeaseExpired(time)) {
-			if (this._masterId !== undefined) {
+			if (this._masterId !== undefined && this.isMaster()) {
 				console.log(`Node ${super.id} says: My lease expired while waiting for confirmation, I'm no longer the master`);
 				//Reset master but don't start election because there's one in progress already
 				this._masterId = undefined;
@@ -89,11 +90,19 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		} else {
 			if (accepted.sourceNodeId === this._masterId) {
 				//trust whatever the master says
-				const resolution = new Resolution(accepted);
-				this.resolutionAchieved(resolution);
+				this._trustMasterHandleAccepted(accepted);
 			}
 		}
 	}
+	_trustMasterHandleAccepted(accepted) {
+		if (super.isDown()) return;
+		if (!super.roles.includes(Role.LEARNER)) return;
+		if (!this.isFromCurrentPaxosInstance(accepted)) return;
+
+		//trust whatever the master says
+		const resolution = new Resolution(accepted);
+		this.resolutionAchieved(resolution);
+	};
 
 	broadcastAccepted(accept) {
 		if (!this._enableOptimizations || this._masterId === undefined) {
@@ -106,8 +115,15 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 	}
 
 	stop() {
+		this._leaseStartTime = undefined;
+		this._proposedLeaseStartTime = undefined;
 		this._masterId = undefined;
 		super.stop();
+	}
+
+	start() {
+		super.start();
+		this.leaseExpired();
 	}
 
 	resolutionAchieved(resolution) {
@@ -185,6 +201,19 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		this._proposedLeaseStartTime = undefined;
 	}
 
+	handleSyncRequest(syncRequest) {
+		super.handleSyncRequest(syncRequest, this._masterId);
+	}
+
+	handleCatchup(catchUp) {
+		if (this.isDown()) return;
+		if (catchUp.paxosInstanceNumber <= super.paxosInstanceNumber) return;
+
+		super.doCatchup(catchUp.paxosInstanceNumber, catchUp.missingLogEntries, catchUp.cluster);
+
+		this._masterId = catchUp.masterId;
+	}
+
 	leaseExpired() {
 		this._masterId = undefined;
 		this._startElection();
@@ -194,6 +223,10 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		return this._masterId;
 	}
 
+	get leaseStartTime() {
+		return this._leaseStartTime;
+	}
+
 };
 
-const LEASE_WINDOW = 200000;
+export const LEASE_WINDOW = 200000;

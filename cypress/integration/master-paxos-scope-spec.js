@@ -38,7 +38,7 @@ describe('Paxos Scope with Sync and Master', function () {
 			cy.get('a.message.Accept').should('have.length', 3);
 			cy.get('a.message.Accepted').should('have.length', 9);
 
-			checkLog(['0', '1'])
+			checkLog(['3', 'v'])
 		});
 	});
 

@@ -29,7 +29,7 @@ class Acceptor {
 		let promise;
 		if (this._honorsPromise(proposalId) && !this._isAccepted(proposalId)) {
 			// accept prepare
-			promise = new Promise(this._paxosInstanceNumber, prepare, this._acceptedValue, this._acceptedProposalId);
+			promise = new Promise(this._paxosInstanceNumber, prepare, this._acceptedProposalId, this._acceptedValue);
 			this._promisedProposalId = proposalId;
 			if (broadcast) {
 				this.messageHandler.send(promise);
@@ -65,6 +65,18 @@ class Acceptor {
 			const accepted = new Accepted(accept, learner.id);
 			this.messageHandler.send(accepted);
 		});
+	}
+
+	get promisedProposalId() {
+		return this._promisedProposalId;
+	}
+
+	get acceptedProposalId() {
+		return this._acceptedProposalId;
+	}
+
+	get acceptedValue() {
+		return this._acceptedValue;
 	}
 
 	_honorsPromise(proposalId) {

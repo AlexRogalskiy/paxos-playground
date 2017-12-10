@@ -28,10 +28,20 @@ $(function () {
 		pendingConf: [], //TODO not used for now
 		deadServersWalking: {},
 		channelNoise: 0,
+		config: undefined
 	});
 
 	// create servers
 	(function () {
+		//save config on model
+		const urlParams = new URLSearchParams(window.location.search);
+		window.state.current.config = urlParams.get('config') || "default";
+
+		//enable add server button
+		if (window.state.current.config.endsWith("config")) {
+			$('#add-server').show();
+		}
+
 		const allNodes = [];
 		for (let i = 0; i < INITIAL_SERVER_NUMBER; i++) {
 			let node = util.createNode(window.state.current);

@@ -148,6 +148,21 @@ $(function () {
 	render.servers = function (serversSame) {
 		state.current.servers.forEach(function (server) {
 			var serverNode = $('#server-' + server.id, svg);
+
+			if (state.current.config.startsWith("master") && Number.isFinite(server.electionAlarm)) {
+				if (!server.isDown()) {
+					//render election timer
+					$('path', serverNode)
+						.show()
+						.attr('d', arcSpec(serverSpec(server.id),
+							util.clamp((server.electionAlarm - state.current.time) /
+								(ELECTION_TIMEOUT),
+								0, 1)));
+				} else {
+					$('path', serverNode).hide();
+				}
+			}
+
 			if (!serversSame) {
 				$('text.term', serverNode).text(server.term);
 				serverNode.attr('class', 'server ' + server.state);
@@ -339,7 +354,7 @@ $(function () {
 							if (array_id < server.log.length) {
 								Array.prototype.push.apply(line, [
 									'class= "commited ',
-									'color-', server.log[array_id].paxosInstanceNumber % 10,
+									util.getLogClass(server.log[array_id]),
 									server.log[array_id].isConfig ? ' config' : '',
 									server.log[array_id].isNoop ? ' noop' : '',
 								]);
@@ -347,7 +362,7 @@ $(function () {
 							Array.prototype.push.apply(line, [
 								'">',
 								(array_id >= server.log.length ? '' : (
-									server.log[array_id].paxosInstanceNumber +
+									util.getLogEntryValue(server.log[array_id]) +
 									(!server.log[array_id].isConfig ? '' : (
 										'C<sub>' +
 										(server.log[array_id].isAdd ? '+' : '-') +
@@ -549,8 +564,9 @@ $(function () {
 	var serverActions = [
 		['stop', paxos.stop],
 		['resume', paxos.resume],
-		['restart', paxos.restart],
-		['request', paxos.clientRequest],
+		// ['restart', paxos.restart],
+		['request X', paxos.clientRequestX],
+		['request Y', paxos.clientRequestY],
 		['remove', paxos.removeServer],
 	];
 
@@ -565,45 +581,24 @@ $(function () {
 		var li = function (label, value) {
 			return '<dt>' + label + '</dt><dd>' + value + '</dd>';
 		};
+
+		const $dl = $('<dl class="dl-horizontal"></dl>');
+
 		$('.modal-body', m)
 			.empty()
-			.append($('<dl class="dl-horizontal"></dl>')
-				.append(li('state', server.state))
-				.append(li('paxos instance number', server.term))
+			.append($dl
+				.append(li('State', server.state))
+				.append(li('Paxos instance number', server.term))
+				.append(li('Proposed value', util.getLogEntryValueLong(server.getProposedValue())))
+				.append(li('Promised proposal id', util.proposalIdToString(server.getPromisedProposalId())))
+				.append(li('Accepted proposal id ', util.proposalIdToString(server.getAcceptedProposalId())))
+				.append(li('Accepted value ', util.getLogEntryValueLong(server.getAcceptedValue())))
 			);
-		var isLeader = server.isMaster();
-		if (isLeader || server.state === "candidate") {
-			var tableHeader = $('<tr></tr>');
-			var peerTable = $('<table></table>');
-			peerTable.addClass('table table-condensed');
-			tableHeader.append('<th>peer</th>');
-			if (isLeader)
-				tableHeader
-					.append('<th>next index</th>')
-					.append('<th>match index</th>');
-			tableHeader
-				.append('<th>vote granted</th>')
-				.append('<th>RPC due</th>');
-			if (isLeader) tableHeader.append('<th>heartbeat due</th>');
-			peerTable.append(tableHeader);
-			server.peers.forEach(function (peer) {
-				var tableRow = $('<tr></tr>');
-				tableRow.append('<td>S' + peer + '</td>')
-				if (isLeader)
-					tableRow
-						.append('<td>' + server.nextIndex[peer] + '</td>')
-						.append('<td>' + server.matchIndex[peer] + '</td>');
-				tableRow
-					.append('<td>' + server.voteGranted[peer] + '</td>')
-					//  Dirty hack to replace negative timers from being displayed in rpcDue
-					.append('<td>' + util.relativeTime(server.rpcDue[peer] === 0 ? util.Inf : server.rpcDue[peer], model.time) + '</td>');
-				if (isLeader) tableRow.append('<td>' + util.relativeTime(server.heartbeatDue[peer], model.time) + '</td>');
-				peerTable.append(tableRow);
-			});
-			$('.modal-body dl', m)
-				.append($('<dt>peers</dt>'))
-				.append($('<dd></dd>').append(peerTable));
+
+		if (state.current.config.startsWith("master")) {
+			$dl.append(li('Master Id', server.masterId))
 		}
+
 		var footer = $('.modal-footer', m);
 		footer.empty();
 		serverActions.filter(function (action) {
@@ -634,12 +629,12 @@ $(function () {
 			.append(li('to', 'S' + message.to))
 			.append(li('sent', util.relativeTime(message.sendTime, model.time)))
 			.append(li('deliver', util.relativeTime(message.recvTime, model.time)))
-			.append(li('term', message.term));
-		
+			.append(li('paxos instance number', message.term))
+			.append(li('proposal id', util.proposalIdToString(message.proposalId)));
+
 		if (message.value !== undefined) {
 			fields
-				.append(li('value', message.value.value))
-				.append(li('value type', util.getSymbolDescription(message.value.entryType)));
+				.append(li('value', util.getLogEntryValueLong(message.value)))
 		}
 
 		if (message.type == 'RequestVote') {

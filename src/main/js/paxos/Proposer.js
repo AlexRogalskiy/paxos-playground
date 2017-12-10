@@ -62,6 +62,10 @@ class Proposer {
 	broadcastAccept() {
 		this._currentProposal.broadcastAccept(this._proposedValue);
 	}
+
+	get proposedValue() {
+		return this._proposedValue;
+	}
 }
 
 class Proposal {

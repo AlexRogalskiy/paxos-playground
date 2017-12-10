@@ -8,19 +8,18 @@ import {ConfigMixin} from "../paxos/ConfigurationStrategy.js";
 let nodeIdIdx = 0;
 
 util.createNode = (model, roles = allRoles) => {
-	const urlParams = new URLSearchParams(window.location.search);
-	const config = urlParams.get('config');
-	switch (config) {
+	const newNodeId = nodeIdIdx++;
+	switch (model.config) {
 		case 'master-optimized-config':
-			return new NodeWithMasterAndConfig(nodeIdIdx++, roles, model, true);
+			return new NodeWithMasterAndConfig(newNodeId, roles, model, true);
 		case 'master-optimized':
-			return new NodeWithMaster(nodeIdIdx++, roles, model, true);
+			return new NodeWithMaster(newNodeId, roles, model, true);
 		case 'master':
-			return new NodeWithMaster(nodeIdIdx++, roles, model, false);
+			return new NodeWithMaster(newNodeId, roles, model, false);
 		case 'sync':
-			return new NodeWithSync(nodeIdIdx++, roles);
+			return new NodeWithSync(newNodeId, roles);
 		default:
-			return new Node(nodeIdIdx++, roles)
+			return new Node(newNodeId, roles)
 	}
 };
 

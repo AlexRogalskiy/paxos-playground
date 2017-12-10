@@ -11,13 +11,13 @@ describe('Paxos Scope with Sync', function () {
 		});
 
 		it('Node 3 stays out of date', function () {
-			cy.get('#cell-0-1').should('have.text', '0');
-			cy.get('#cell-1-1').should('have.text', '0');
-			cy.get('#cell-2-1').should('have.text', '0');
+			cy.get('#cell-0-1').should('have.text', 'v');
+			cy.get('#cell-1-1').should('have.text', 'v');
+			cy.get('#cell-2-1').should('have.text', 'v');
 
 			startNode(3);
 
-			cy.get('#cell-3-1').should('have.text', '0');
+			cy.get('#cell-3-1').should('have.text', 'v');
 		});
 	});
 });

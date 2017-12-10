@@ -149,7 +149,7 @@ $(function () {
     render.servers = function (serversSame) {
         state.current.servers.forEach(function (server) {
             var serverNode = $('#server-' + server.id, svg);
-	        //Rendering election timer?
+	        //Rendering election timer
             $('path', serverNode)
                 .attr('d', arcSpec(serverSpec(server.id),
                     util.clamp((server.electionAlarm - state.current.time) /

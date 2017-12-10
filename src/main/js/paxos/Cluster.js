@@ -27,6 +27,9 @@ class Cluster {
 		return this._nodes.filter(node => node.roles.includes(role))
 	}
 
+	getMaster() {
+		return this._nodes.find(node => node.isMaster())
+	}
 
 	get nodes() {
 		return this._nodes;

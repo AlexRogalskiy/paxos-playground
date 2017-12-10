@@ -360,6 +360,38 @@ a#time-button {
   margin-left:-7px;
 }
 
+.log-application-level {
+  fill: #a6d854;
+  background: #a6d854;
+}
+
+.application-level-color {
+  color: #a6d854;
+}
+
+#add-server {
+  display: none;
+}
+
+.log-config-change {
+  font-size: 12pt;
+  fill: #8da0cb;
+  background: #8da0cb;
+}
+
+.config-change-color {
+  color: #8da0cb;
+}
+
+.log-election {
+  fill: #fc8d62;
+  background: #fc8d62;
+}
+
+.election-color {
+  color: #fc8d62;
+}
+
 .color-0{fill: #FC0FC0; background: #FC0FC0}/*pink*/
 .color-1{fill: #4CAF50; background: #4CAF50}/*green*/
 .color-2{fill: #2196F3; background: #2196F3} /*light blue*/

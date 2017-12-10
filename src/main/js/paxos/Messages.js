@@ -148,11 +148,12 @@ class CatchUp extends Message {
 	// _missingLogEntries;
 
 	//The paxos instance number used here is the latest one the node answering sync knows about
-	constructor(syncRequest, latestPaxosInstanceNumber, missingLogEntries, cluster) {
+	constructor(syncRequest, latestPaxosInstanceNumber, missingLogEntries, cluster, masterId) {
 		// invert message source and target
 		super(latestPaxosInstanceNumber, syncRequest.targetNodeId, syncRequest.sourceNodeId);
 		this._missingLogEntries = missingLogEntries;
-		this._cluster = cluster
+		this._cluster = cluster;
+		this._masterId = masterId;
 	}
 
 	get missingLogEntries() {
@@ -161,6 +162,10 @@ class CatchUp extends Message {
 
 	get cluster() {
 		return this._cluster;
+	}
+
+	get masterId() {
+		return this._masterId;
 	}
 }
 
