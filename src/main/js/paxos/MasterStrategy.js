@@ -121,6 +121,11 @@ export const MasterMixin = (nodeClass) => class extends nodeClass {
 		super.stop();
 	}
 
+	start() {
+		super.start();
+		this.leaseExpired();
+	}
+
 	resolutionAchieved(resolution) {
 		const resolutionEntry = resolution.value;
 
