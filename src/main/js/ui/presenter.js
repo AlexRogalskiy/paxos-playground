@@ -59,12 +59,12 @@ $(function () {
 			playback.pause();
 			$('#modal-help').modal('show');
 			processed = true;
-		} else if (e.keyCode === 107 || e.keyCode === 221) { /* numpad + and keyboard ] */
+		} else if (e.keyCode === 107 || e.keyCode === 221 || e.keyCode === 187) { /* numpad + and keyboard ] */
 			speedSlider.slider('setValue', util.clamp(speedSlider.slider('getValue') - 0.3, 0, 3));
 			render.update();
 			$('.modal').modal('hide');
 			processed = true;
-		} else if (e.keyCode === 109 || e.keyCode === 219) { /* numpad - and keyboard [ */
+		} else if (e.keyCode === 109 || e.keyCode === 219 || e.keyCode === 189) { /* numpad - and keyboard [ */
 			speedSlider.slider('setValue', util.clamp(speedSlider.slider('getValue') + 0.3, 0, 3));
 			render.update();
 			$('.modal').modal('hide');
